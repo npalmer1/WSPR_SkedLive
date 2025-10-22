@@ -86,6 +86,9 @@ namespace WSPR_Live
         int OpSystem = 0; //default to Windows
         string slash = "\\"; //default to Windows
 
+        int startCount = 0;
+        int startCountMax = 6; //360; //<6 mins
+
         MessageClass Msg = new MessageClass();
 
         public bool stopUrl = false;
@@ -1073,6 +1076,14 @@ namespace WSPR_Live
         }
         private async void updatePassandCall()
         {
+            string freq = "";
+            startCount++;
+            if (startCount > startCountMax)  //X minutes
+            {              
+                    startCount = 0;
+                    await get_results(call, freq, db_server, db_user, db_pass, 10);                
+
+            }
             await getUserandPassword();
         }
     }
