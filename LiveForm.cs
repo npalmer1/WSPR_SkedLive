@@ -49,9 +49,8 @@ using System.Security.Cryptography;
 //using Org.BouncyCastle.Crypto.Tls;
 //using Org.BouncyCastle.Crypto.Engines;
 //using static Org.BouncyCastle.Asn1.Cmp.Challenge;
-using System.Security.Cryptography;
+
 using System.Security.Policy;
-using System.Text;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -88,6 +87,10 @@ namespace WSPR_Live
 
         int startCount = 0;
         int startCountMax = 6; //360; //<6 mins
+
+        string db_server = "127.0.0.1";
+        string db_user = "admin";
+        string db_pass = "wspr";
 
         MessageClass Msg = new MessageClass();
 
@@ -180,9 +183,7 @@ namespace WSPR_Live
         }
         RX_data RX = new RX_data();
 
-        private string db_server;
-        private string db_user;
-        private string db_pass;
+       
 
         DataTable RXtable = new DataTable();
 
@@ -206,7 +207,7 @@ namespace WSPR_Live
 
         }
 
-        private async Task<bool> getUserandPassword()
+        private async Task getUserandPassword()
         {
             string key = "wsproundtheworld";
             Encryption enc = new Encryption();
@@ -257,7 +258,7 @@ namespace WSPR_Live
                                 if (dbcall.Contains("db_call:"))
                                 {
                                     dbcall = dbcall.Replace("db_call: ", "").Trim();
-                                    if (dbcall.Length != null && dbcall != "")
+                                    if (dbcall != null && dbcall != "")
                                     {
                                         call = dbcall;
                                     }
@@ -268,18 +269,17 @@ namespace WSPR_Live
                         if (!ok)
                         {
                             Msg.TMessageBox("Unable to read database credentials", "", 1000);
-                            return false;
+                            
                         }
                     }
                     catch (Exception ex)
                     {
                         Msg.TMessageBox("Unable to read database credentials", "", 1000);
-                        return false;
+                       
                     }
                 }
             }
 
-            return ok;
         }
 
         public async Task process_data(string data)
@@ -370,8 +370,7 @@ namespace WSPR_Live
 
         private async Task show_results(string server, string user, string pass) // read back from the reported table to populate the datagridview
         {
-            lock (_lock)
-            {
+           
                 dataGridView1.Rows.Clear();
                 dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
                                                                                              //DateTime dt = DateTime.Now.ToUniversalTime();
@@ -380,11 +379,11 @@ namespace WSPR_Live
                 int rows = table_count(server, user, pass);
                 if (rows > 0)
                 {
-                    find_received(rows);
+                    await find_received(rows);
 
                 }
                 dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
-            }
+            
         }
 
         private int table_count(string server, string user, string pass)
@@ -415,7 +414,7 @@ namespace WSPR_Live
             }
         }
 
-        private bool find_received(int tablecount) //find a slot row for display in grid from the database corresponding to the date/time from the slot
+        private async Task<bool> find_received(int tablecount) //find a slot row for display in grid from the database corresponding to the date/time from the slot
         {
             DataTable Slots = new DataTable();
             //DateTime d = new DateTime();
@@ -425,86 +424,90 @@ namespace WSPR_Live
             MySqlConnection connection = new MySqlConnection(myConnectionString);
             if (!databaseError)
             {
-                try
+                lock (_lock)
                 {
-
-
-                    connection.Open();
-
-                    MySqlCommand command = connection.CreateCommand();
-
-                    //SELECT* FROM your_table ORDER BY your_date_column DESC LIMIT 500;
-
-                    command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
-                    MySqlDataReader Reader;
-                    Reader = command.ExecuteReader();
-
-                    while (Reader.Read())
+                    try
                     {
-                        found = true;
 
-                        if (i < maxrows && i < tablecount)    //only show first maxrows rows, or to length of reported table
+
+                        connection.Open();
+
+                        MySqlCommand command = connection.CreateCommand();
+
+                        //SELECT* FROM your_table ORDER BY your_date_column DESC LIMIT 500;
+
+                        command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
+                        MySqlDataReader Reader;
+                        Reader = command.ExecuteReader();
+
+                        while (Reader.Read())
                         {
+                            found = true;
 
-                            RX.time = (DateTime)Reader["time"];
-                            RX.band = (Int16)Reader["band"];
-                            RX.rx_sign = (string)Reader["rx_sign"];
-                            RX.rx_loc = (string)Reader["rx_loc"];
-                            RX.tx_sign = (string)Reader["tx_sign"];
-                            RX.tx_loc = (string)Reader["tx_loc"];
-                            RX.distance = (int)Reader["distance"];
-                            RX.azimuth = (int)Reader["azimuth"];
-                            RX.frequency = (int)Reader["frequency"];
-                            RX.power = (Int16)Reader["power"];
-                            RX.snr = (Int16)Reader["snr"];
-                            RX.drift = (Int16)Reader["drift"];
-                            RX.version = (string)Reader["version"];
-
-
-                            cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
-                            cells[1] = RX.tx_sign; //tx sign
-                            double f = Convert.ToDouble(RX.frequency);
-                            f = f / 1000000;
-                            string formattedF = f.ToString("F6");
-                            cells[2] = formattedF; //freq
-                            string snr = Convert.ToString(RX.snr);
-                            if (RX.snr > 0)
+                            if (i < maxrows && i < tablecount)    //only show first maxrows rows, or to length of reported table
                             {
-                                snr = "+" + snr;
-                            }
-                            cells[3] = snr;  //snr
-                            cells[4] = RX.drift.ToString();  //drift
-                            cells[5] = RX.tx_loc;  //tx loc
-                            cells[6] = RX.power.ToString();   //power dBm
-                            cells[7] = RX.rx_sign;  //reporter
-                            cells[8] = RX.rx_loc;    //rx loc
 
-                            cells[9] = RX.distance.ToString();   //km
-                            int km = Convert.ToInt32(RX.distance);    //miles
-                            cells[10] = convert_to_miles(km);
-                            cells[11] = RX.azimuth.ToString();
-                            cells[12] = RX.version;   //version
-                            update_grid(); //add this row to the datagridview
-                            i++;
+                                RX.time = (DateTime)Reader["time"];
+                                RX.band = (Int16)Reader["band"];
+                                RX.rx_sign = (string)Reader["rx_sign"];
+                                RX.rx_loc = (string)Reader["rx_loc"];
+                                RX.tx_sign = (string)Reader["tx_sign"];
+                                RX.tx_loc = (string)Reader["tx_loc"];
+                                RX.distance = (int)Reader["distance"];
+                                RX.azimuth = (int)Reader["azimuth"];
+                                RX.frequency = (int)Reader["frequency"];
+                                RX.power = (Int16)Reader["power"];
+                                RX.snr = (Int16)Reader["snr"];
+                                RX.drift = (Int16)Reader["drift"];
+                                RX.version = (string)Reader["version"];
+
+
+                                cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
+                                cells[1] = RX.tx_sign; //tx sign
+                                double f = Convert.ToDouble(RX.frequency);
+                                f = f / 1000000;
+                                string formattedF = f.ToString("F6");
+                                cells[2] = formattedF; //freq
+                                string snr = Convert.ToString(RX.snr);
+                                if (RX.snr > 0)
+                                {
+                                    snr = "+" + snr;
+                                }
+                                cells[3] = snr;  //snr
+                                cells[4] = RX.drift.ToString();  //drift
+                                cells[5] = RX.tx_loc;  //tx loc
+                                cells[6] = RX.power.ToString();   //power dBm
+                                cells[7] = RX.rx_sign;  //reporter
+                                cells[8] = RX.rx_loc;    //rx loc
+
+                                cells[9] = RX.distance.ToString();   //km
+                                int km = Convert.ToInt32(RX.distance);    //miles
+                                cells[10] = convert_to_miles(km);
+                                cells[11] = RX.azimuth.ToString();
+                                cells[12] = RX.version;   //version
+                                update_grid(); //add this row to the datagridview
+                                i++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+
                         }
-                        else
-                        {
-                            break;
-                        }
+                        Reader.Close();
+                        connection.Close();
+                        databaseError = false;
+
 
                     }
-                    Reader.Close();
-                    connection.Close();
-                    databaseError = false;
+                    catch
+                    {
 
-                }
-                catch
-                {
+                        //databaseError = true; //stop wasting time trying to connect if database error - ignore for present
+                        found = false;
+                        connection.Close();
 
-                    //databaseError = true; //stop wasting time trying to connect if database error - ignore for present
-                    found = false;
-                    connection.Close();
-
+                    }
                 }
             }
             return found;
@@ -1010,7 +1013,7 @@ namespace WSPR_Live
 
                 return;
             }
-            timer1.Interval = 140000;
+            timer1.Interval = 120000;
             timer1.Enabled = true;
             timer1.Start(); //prevent multiple presses within 2 minutes
             Nowbutton.Text = "Wait ...";
@@ -1070,7 +1073,7 @@ namespace WSPR_Live
             Plabel.Text = PlistBox.SelectedItem.ToString();
         }
 
-        private async void timer2_Tick(object sender, EventArgs e)
+        private void timer2_Tick(object sender, EventArgs e)
         {
            updatePassandCall();
         }
@@ -1084,7 +1087,12 @@ namespace WSPR_Live
                     await get_results(call, freq, db_server, db_user, db_pass, 10);                
 
             }
-            await getUserandPassword();
+            //await Task.Run(() =>
+            //{
+                await getUserandPassword();
+
+            //});
+           
         }
     }
 }

@@ -286,7 +286,7 @@
             // 
             // timer1
             // 
-            timer1.Interval = 140000;
+            timer1.Interval = 120000;
             timer1.Tick += timer1_Tick;
             // 
             // dataGridView1
