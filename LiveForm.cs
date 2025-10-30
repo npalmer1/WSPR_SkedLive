@@ -28,6 +28,8 @@ using System.IO;
 //using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.ConstrainedExecution;
+
 //using System.Linq;
 //using System.Net;
 //using System.Net.Http;
@@ -91,6 +93,7 @@ namespace WSPR_Live
         string db_server = "127.0.0.1";
         string db_user = "admin";
         string db_pass = "wspr";
+        string ver = "";
 
         MessageClass Msg = new MessageClass();
 
@@ -107,8 +110,7 @@ namespace WSPR_Live
         private void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            string ver = "0.1.1";
-            this.Text = "WSPR Scheduler Live                     V." + ver + "    GNU GPLv3 License";
+            ver = "0.1.1";            
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -139,11 +141,9 @@ namespace WSPR_Live
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
         {
-            this.Text = "Received transmissions for: " + call;
+            this.Text = "Received transmissions for: " + call + "                WSPR Scheduler Live  V." + ver + "    GNU GPLv3 License"; ;
             Callsign = call;
-            //server = serverName;
-            //user = db_user;
-            //pass = db_pass;
+        
             dataGridView1.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dataGridView1.Columns[4].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dataGridView1.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -330,7 +330,7 @@ namespace WSPR_Live
         }
         private async void updateResults()
         {
-            show_results(db_server, db_user, db_pass);
+            await show_results(db_server, db_user, db_pass);
         }
 
         public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan)
@@ -816,6 +816,7 @@ namespace WSPR_Live
             }
 
         }
+        /*
         private bool update_received(string serverName, string db_user, string db_pass)  //not used
         {
             string c = "";
@@ -845,6 +846,7 @@ namespace WSPR_Live
                 return false;
             }
         }
+        */
 
         private async void WXbutton_Click(object sender, EventArgs e)
         {
@@ -978,7 +980,7 @@ namespace WSPR_Live
             }
         }
 
-        private void Nowbutton_Click(object sender, EventArgs e)
+        private async void Nowbutton_Click(object sender, EventArgs e)
         {
             updateNow();
 
@@ -1084,7 +1086,7 @@ namespace WSPR_Live
             if (startCount > startCountMax)  //X minutes
             {              
                     startCount = 0;
-                    await get_results(call, freq, db_server, db_user, db_pass, 10);                
+                    get_results(call, freq, db_server, db_user, db_pass, 10);                
 
             }
             //await Task.Run(() =>
