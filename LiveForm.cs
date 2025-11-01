@@ -336,6 +336,8 @@ namespace WSPR_Live
         public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan)
         {
             //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
+            MessageForm nForm = new MessageForm();
+            Msg.TCMessageBox("Please wait - retrieving data ....", "", 20000, nForm);
             var live = new Wspr_live();
             int band = 0;
 
@@ -365,6 +367,7 @@ namespace WSPR_Live
             await Task.Delay(1000);
 
             await show_results(server, db_user, db_pass);
+            nForm.Dispose();
 
         }
 
@@ -982,8 +985,8 @@ namespace WSPR_Live
 
         private async void Nowbutton_Click(object sender, EventArgs e)
         {
-            updateNow();
-
+           
+            updateNow();          
         }
         private async Task updateNow()
         {
@@ -1006,8 +1009,10 @@ namespace WSPR_Live
             string freq = "";
             if (!timer1.Enabled)
             {
+            
+                    await get_results(Callsign, freq, db_server, db_user, db_pass, min);
 
-                get_results(Callsign, freq, db_server, db_user, db_pass, min);
+                              
                 PlistBox.SelectedIndex = 0;
             }
             else
@@ -1089,11 +1094,8 @@ namespace WSPR_Live
                     get_results(call, freq, db_server, db_user, db_pass, 10);                
 
             }
-            //await Task.Run(() =>
-            //{
+          
                 await getUserandPassword();
-
-            //});
            
         }
     }
