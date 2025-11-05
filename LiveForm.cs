@@ -338,35 +338,42 @@ namespace WSPR_Live
             //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
             MessageForm nForm = new MessageForm();
             Msg.TCMessageBox("Please wait - retrieving data ....", "", 20000, nForm);
-            var live = new Wspr_live();
-            int band = 0;
-
-            if (stopUrl)
+            try
             {
-                return;
+                var live = new Wspr_live();
+                int band = 0;
+
+                if (stopUrl)
+                {
+                    return;
+                }
+                if (!await live.checkSQL())
+                {
+                    return;
+                }
+
+                await live.Get_Received(call, band, timespan, liveLimit);   //callsign, band (from freq - not used), timespan (las ten minutes), max entries to get
+                                                                            //string received = live.Reply;
+                textBox1.Text = live.textBox1.Text;
+                using var reader = new StringReader(textBox1.Text);
+
+                string line;
+
+                while ((line = reader.ReadLine()) != null)
+                {
+                    await process_data(line);
+                    await Save_Received(server, db_user, db_pass);
+
+                }
+
+                await Task.Delay(1000);
+
+                await show_results(server, db_user, db_pass);
             }
-            if (!await live.checkSQL())
+            catch
             {
-                return;
-            }
-
-            await live.Get_Received(call, band, timespan, liveLimit);   //callsign, band (from freq - not used), timespan (las ten minutes), max entries to get
-            //string received = live.Reply;
-            textBox1.Text = live.textBox1.Text;
-            using var reader = new StringReader(textBox1.Text);
-
-            string line;
-
-            while ((line = reader.ReadLine()) != null)
-            {
-                await process_data(line);
-                await Save_Received(server, db_user, db_pass);
 
             }
-
-            await Task.Delay(1000);
-
-            await show_results(server, db_user, db_pass);
             nForm.Dispose();
 
         }
@@ -378,7 +385,8 @@ namespace WSPR_Live
                 dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
                                                                                              //DateTime dt = DateTime.Now.ToUniversalTime();
                                                                                              //dt = dt.AddHours(-2);
-                                                                                             // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
+            try
+            {                                                                           // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
                 int rows = table_count(server, user, pass);
                 if (rows > 0)
                 {
@@ -386,6 +394,11 @@ namespace WSPR_Live
 
                 }
                 dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+            }
+            catch
+            {
+
+            }
             
         }
 
@@ -755,17 +768,24 @@ namespace WSPR_Live
         {
 
             DataGridViewRow row = new DataGridViewRow();
-            row.CreateCells(dataGridView1);
-            for (int i = 0; i < 13; i++)
+            try
             {
+                row.CreateCells(dataGridView1);
+                for (int i = 0; i < 13; i++)
+                {
 
-                row.Cells[i].Value = cells[i];
+                    row.Cells[i].Value = cells[i];
+                }
+
+                dataGridView1.Rows.Add(row);
+                if (dataGridView1.Rows.Count > 0)
+                {
+                    dataGridView1.AllowUserToAddRows = false;
+                }
             }
-
-            dataGridView1.Rows.Add(row);
-            if (dataGridView1.Rows.Count > 0)
+            catch
             {
-                dataGridView1.AllowUserToAddRows = false;
+
             }
         }
         public async Task Save_Received(string serverName, string db_user, string db_pass)
@@ -991,39 +1011,46 @@ namespace WSPR_Live
         private async Task updateNow()
         {
             int min = 30;
-            if (PlistBox.SelectedIndex > -1)
+            try
             {
-                min = findP();
-            }
-            string url = "http://db1.wspr.live";
-            if (stopUrl)
-            {
-                Msg.TMessageBox("Internet is disabled", "", 2000);
-                return;
-            }
-            var live = new Wspr_live();
-            if (!await live.checkSQL())
-            {
-                Msg.TMessageBox("Cannot connect", "", 2000);
-            }
-            string freq = "";
-            if (!timer1.Enabled)
-            {
-            
+                if (PlistBox.SelectedIndex > -1)
+                {
+                    min = findP();
+                }
+                string url = "http://db1.wspr.live";
+                if (stopUrl)
+                {
+                    Msg.TMessageBox("Internet is disabled", "", 2000);
+                    return;
+                }
+                var live = new Wspr_live();
+                if (!await live.checkSQL())
+                {
+                    Msg.TMessageBox("Cannot connect", "", 2000);
+                }
+                string freq = "";
+                if (!timer1.Enabled)
+                {
+
                     await get_results(Callsign, freq, db_server, db_user, db_pass, min);
 
-                              
-                PlistBox.SelectedIndex = 0;
+
+                    PlistBox.SelectedIndex = 0;
+                }
+                else
+                {
+
+                    return;
+                }
+                timer1.Interval = 120000;
+                timer1.Enabled = true;
+                timer1.Start(); //prevent multiple presses within 2 minutes
+                Nowbutton.Text = "Wait ...";
             }
-            else
+            catch
             {
 
-                return;
             }
-            timer1.Interval = 120000;
-            timer1.Enabled = true;
-            timer1.Start(); //prevent multiple presses within 2 minutes
-            Nowbutton.Text = "Wait ...";
         }
 
         private int findP()
