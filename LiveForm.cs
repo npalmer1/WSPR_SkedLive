@@ -380,13 +380,13 @@ namespace WSPR_Live
 
         private async Task show_results(string server, string user, string pass) // read back from the reported table to populate the datagridview
         {
-           
+            try 
+            { 
                 dataGridView1.Rows.Clear();
                 dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
                                                                                              //DateTime dt = DateTime.Now.ToUniversalTime();
                                                                                              //dt = dt.AddHours(-2);
-            try
-            {                                                                           // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
+                                                                                    // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
                 int rows = table_count(server, user, pass);
                 if (rows > 0)
                 {
@@ -1055,38 +1055,43 @@ namespace WSPR_Live
 
         private int findP()
         {
-
-            int p = PlistBox.SelectedIndex;
-            int i = 0;
-            switch (p)
+            try
             {
-                case 0:
-                    p = 10;
-                    break;
-                case 1:
-                    i = 30;
-                    break;
-                case 2:
-                    i = 60;
-                    break;
-                case 3:
-                    i = 180;
-                    break;
-                case 4:
-                    i = 360;
-                    break;
-                case 5:
-                    i = 720;
-                    break;
-                case 6:
-                    i = 1440;
-                    break;
-                default:
-                    i = 0;
-                    break;
+                int p = PlistBox.SelectedIndex;
+                int i = 0;
+                switch (p)
+                {
+                    case 0:
+                        p = 10;
+                        break;
+                    case 1:
+                        i = 30;
+                        break;
+                    case 2:
+                        i = 60;
+                        break;
+                    case 3:
+                        i = 180;
+                        break;
+                    case 4:
+                        i = 360;
+                        break;
+                    case 5:
+                        i = 720;
+                        break;
+                    case 6:
+                        i = 1440;
+                        break;
+                    default:
+                        i = 0;
+                        break;
+                }
+                return i;
             }
-            return i;
-
+            catch
+            {
+                return 0;
+            }
 
         }
 
