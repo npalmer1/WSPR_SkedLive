@@ -1026,7 +1026,8 @@ namespace WSPR_Live
                 var live = new Wspr_live();
                 if (!await live.checkSQL())
                 {
-                    Msg.TMessageBox("Cannot connect", "", 2000);
+                    Msg.TMessageBox("Cannot connect to wspr.live ...", "Error connecting", 3500);
+                    return;
                 }
                 string freq = "";
                 if (!timer1.Enabled)
