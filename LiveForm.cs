@@ -885,6 +885,8 @@ namespace WSPR_Live
 
         private void filterbutton_Click(object sender, EventArgs e)
         {
+            MessageForm nForm = new MessageForm();
+            Msg.TCMessageBox("Please wait ....", "", 20000, nForm);
             if (filterbutton.Text == "Apply")
             {
                 filter_results(db_server, db_user, db_pass);
@@ -895,6 +897,7 @@ namespace WSPR_Live
                 show_results(db_server, db_user, db_pass);
                 filterbutton.Text = "Apply";
             }
+            nForm.Dispose();
         }
 
         private void DFromtextBox_KeyPress(object sender, KeyPressEventArgs e)
