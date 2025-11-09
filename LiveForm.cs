@@ -1,56 +1,23 @@
-﻿//using Google.Protobuf.WellKnownTypes;
-//using MathNet.Numerics;
-//using MathNet.Numerics.LinearAlgebra.Factorization;
-//using Microsoft.VisualBasic;
-//using Microsoft.VisualBasic.ApplicationServices;
+﻿
 using Microsoft.VisualBasic;
 using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Tls;
 using Security;
 using System;
-//using System.Web;
-//using static System.Net.Mime.MediaTypeNames;
-//using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
-
-//////using Org.BouncyCastle.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-//using System.Diagnostics;
-//using System.Diagnostics.Eventing.Reader;
-//using System.Drawing;
-//using System.Globalization;
 using System.IO;
-//using System.Drawing;
 using System.IO;
-//using System.Linq;
+
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.ConstrainedExecution;
 
-//using System.Linq;
-//using System.Net;
-//using System.Net.Http;
-//using System.Net.NetworkInformation;
-//using System.Reflection;
-//using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-//using static System.Net.WebRequestMethods;
-//using static System.Runtime.InteropServices.JavaScript.JSType;
-//using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
-//using static WSPR_Sked.Form1;
-//using Org.BouncyCastle.Asn1.Cms;
-//using Org.BouncyCastle.Asn1.X509;
-//using Org.BouncyCastle.Bcpg.OpenPgp;
-//using Org.BouncyCastle.Bcpg.Sig;
-//using Org.BouncyCastle.Ocsp;
-//using System.Security;
-//using Org.BouncyCastle.Crypto.Tls;
-//using Org.BouncyCastle.Crypto.Engines;
-//using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 using System.Security.Policy;
 using System.Text;
@@ -839,37 +806,7 @@ namespace WSPR_Live
             }
 
         }
-        /*
-        private bool update_received(string serverName, string db_user, string db_pass)  //not used
-        {
-            string c = "";
-            string myConnectionString = "server=" + serverName + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
-            MySqlConnection connection = new MySqlConnection(myConnectionString);
-            try
-            {
-                MySqlCommand command = connection.CreateCommand();
-                c = "UPDATE reported SET id = " + RX.id + ", time = " + RX.time + ", band = " + RX.band;
-                c = c + ", rx_sign = '" + RX.rx_sign + "', rx_lat = " + RX.rx_lat + ", rx_lon = " + RX.rx_lon + ", rx_loc = '" + RX.rx_loc + "'";
-                c = c + ", tx_sign = '" + RX.tx_sign + "', tx_lat = " + RX.tx_lat + ", tx_lon = " + RX.tx_lon + ", tx_loc = '" + RX.tx_loc + "', distance = " + RX.distance;
-                c = c + ", azimuth = " + RX.azimuth + ", rx_azimuth = " + RX.rx_azimuth;
-                c = c + ", frequency = " + RX.frequency + ", power = " + RX.power + ", snr = " + RX.snr + ", drift = " + RX.drift + ", version = '" + RX.version + "', code = " + RX.code;
-                //c = c + " WHERE slots.Date = '" + d + "' AND slots.Time = '" + t + "'"; // + ";";              
-                //UPDATE `slots` SET `Antenna` = 'GP' WHERE `slots`.`Date` = '2025-02-28' AND `slots`.`Time` = '16:02:00'; 
-                command.CommandText = c;
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-                return true;
-
-            }
-            catch
-            {   //exhausted insert and update
-                connection.Close();
-                //MessageBox.Show("Unable to save to database", "");
-                return false;
-            }
-        }
-        */
+      
 
         private async void WXbutton_Click(object sender, EventArgs e)
         {
