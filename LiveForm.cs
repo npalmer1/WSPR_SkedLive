@@ -79,7 +79,7 @@ namespace WSPR_Live
         private void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            ver = "0.1.2";            
+            ver = "0.1.2";
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -112,7 +112,7 @@ namespace WSPR_Live
         {
             this.Text = "Received transmissions for: " + call + "                WSPR Scheduler Live  V." + ver + "    GNU GPLv3 License"; ;
             Callsign = call;
-        
+
             dataGridView1.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dataGridView1.Columns[4].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dataGridView1.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -152,26 +152,20 @@ namespace WSPR_Live
         }
         RX_data RX = new RX_data();
 
-       
+
 
         DataTable RXtable = new DataTable();
 
-        private void testDBbutton_Click(object sender, EventArgs e)
+        private async void testDB()
         {
-            var live = new Wspr_live();
-            SQL_Get();
-            //live.Get_Received(Callsign, 0, 60, 10); //find 10 entries for last 1 hour
-            if (live.textBox1.Text != "" || live.Reply != "error")
+            bool reply = await SQL_Get();
+            if (!reply)
             {
-
-            }
-            else if (live.Reply == "error")
-            {
-                MessageBox.Show("Connection error");
+                Msg.TMessageBox("Connection error", "", 1500);
             }
             else
             {
-                MessageBox.Show("No entries found for: " + call);
+                Msg.TMessageBox("Connection OK", "", 1500);
             }
 
         }
@@ -238,13 +232,13 @@ namespace WSPR_Live
                         if (!ok)
                         {
                             Msg.TMessageBox("Unable to read database credentials", "", 1000);
-                            
+
                         }
                     }
                     catch (Exception ex)
                     {
                         Msg.TMessageBox("Unable to read database credentials", "", 1000);
-                       
+
                     }
                 }
             }
@@ -305,7 +299,7 @@ namespace WSPR_Live
             nForm.Dispose();
         }
 
-        public async void SQL_Get()
+        public async Task<bool> SQL_Get()
         {
             try
             {
@@ -315,11 +309,17 @@ namespace WSPR_Live
                 {
 
                     MessageBox.Show("SQL version: " + response + " - successful GET");
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
             catch
             {
                 MessageBox.Show("Error connecting");
+                return false;
             }
         }
         public async Task<bool> checkSQL()
@@ -340,7 +340,7 @@ namespace WSPR_Live
             }
             return false;
         }
-        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int limit)             
+        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int limit)
         {
             //note: band not currently used
             textBox1.Multiline = true;
@@ -354,7 +354,7 @@ namespace WSPR_Live
                 Msg.TCMessageBox("Please wait - retrieving live data ....", "", 20000, nForm);
                 try
                 {
-                    
+
                     int band = 0;
 
                     if (stopUrl)
@@ -370,11 +370,11 @@ namespace WSPR_Live
                     string baseUrl = "http://db1.wspr.live/";
                     string sqlQuery = $"SELECT * FROM wspr.rx WHERE tx_sign LIKE '%{call}%' AND time >= subtractMinutes(now(), {timespan}) AND time <= subtractMinutes(now(), 2) LIMIT {limit}";
                     string encodedQuery = Uri.EscapeDataString(sqlQuery);
-                    string requestUrl = $"{baseUrl}?query={encodedQuery}";                
+                    string requestUrl = $"{baseUrl}?query={encodedQuery}";
 
                     using var stream = await client.GetStreamAsync(requestUrl);
                     using var reader = new StreamReader(stream);
-                  
+
                     string line = "";
                     while ((line = reader.ReadLine()) != null)
                     {
@@ -401,7 +401,7 @@ namespace WSPR_Live
                 catch
                 {
                     if (tries > 3)
-                    {                      
+                    {
                         isUnlocked = true;
                         nForm.Dispose();
                         return;
@@ -414,62 +414,19 @@ namespace WSPR_Live
             }
 
         }
-        public async Task get_results_old(string call, string freq, string server, string db_user, string db_pass, int timespan)
-        {
-            //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
-            MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait - retrieving data ....", "", 20000, nForm);
-            try
-            {
-                var live = new Wspr_live();
-                int band = 0;
 
-                if (stopUrl)
-                {
-                    return;
-                }
-                if (!await live.checkSQL())
-                {
-                    return;
-                }
 
-                await live.Get_Received(call, band, timespan, liveLimit);   //callsign, band (from freq - not used), timespan (las ten minutes), max entries to get
-                                                                            //string received = live.Reply;
-                textBox1.Text = live.textBox1.Text;
-                using var reader = new StringReader(textBox1.Text);
 
-                string line;
-
-                while ((line = reader.ReadLine()) != null)
-                {
-                    await process_data(line);
-                    await Save_Received(server, db_user, db_pass);
-
-                }
-
-                await Task.Delay(1000);
-
-                await show_results(server, db_user, db_pass);
-            }
-            catch
-            {
-
-            }
-            nForm.Dispose();
-
-        }
-
-        
 
         private async Task show_results(string server, string user, string pass) // read back from the reported table to populate the datagridview
         {
-            try 
-            { 
+            try
+            {
                 dataGridView1.Rows.Clear();
                 dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
                                                                                              //DateTime dt = DateTime.Now.ToUniversalTime();
                                                                                              //dt = dt.AddHours(-2);
-                                                                                    // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
+                                                                                             // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
                 int rows = table_count(server, user, pass);
                 if (rows > 0)
                 {
@@ -482,7 +439,7 @@ namespace WSPR_Live
             {
 
             }
-            
+
         }
 
         private int table_count(string server, string user, string pass)
@@ -922,17 +879,6 @@ namespace WSPR_Live
             }
 
         }
-      
-
-        private async void WXbutton_Click(object sender, EventArgs e)
-        {
-            var live = new Wspr_live();
-
-            //await live.Get_Weather();   //
-            string spots = live.spots;
-            string info = live.Info;
-            MessageBox.Show("Not implemented");
-        }
 
 
 
@@ -1061,8 +1007,8 @@ namespace WSPR_Live
 
         private async void Nowbutton_Click(object sender, EventArgs e)
         {
-           
-            updateNow();          
+
+            updateNow();
         }
         private async Task updateNow()
         {
@@ -1079,7 +1025,7 @@ namespace WSPR_Live
                     Msg.TMessageBox("Internet is disabled", "", 2000);
                     return;
                 }
-               
+
                 if (!await checkSQL())
                 {
                     Msg.TMessageBox("Cannot connect to wspr.live ...", "Error connecting", 3500);
@@ -1171,21 +1117,26 @@ namespace WSPR_Live
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-           updatePassandCall();
+            updatePassandCall();
         }
         private async void updatePassandCall()
         {
             string freq = "";
             startCount++;
             if (startCount > startCountMax)  //X minutes
-            {              
-                    startCount = 0;
-                    get_results(call, freq, db_server, db_user, db_pass, 10);                
+            {
+                startCount = 0;
+                get_results(call, freq, db_server, db_user, db_pass, 10);
 
             }
-          
-                await getUserandPassword();
-           
+
+            await getUserandPassword();
+
+        }
+
+        private void testDBbutton_Click(object sender, EventArgs e)
+        {
+            testDB();
         }
     }
 }

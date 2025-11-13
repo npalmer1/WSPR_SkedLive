@@ -105,7 +105,6 @@
             WXbutton.Text = "button1";
             WXbutton.UseVisualStyleBackColor = true;
             WXbutton.Visible = false;
-            WXbutton.Click += WXbutton_Click;
             // 
             // dateTimePicker1
             // 
