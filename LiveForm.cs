@@ -1,6 +1,8 @@
 ﻿
+using MathNet.Numerics;
 using Microsoft.VisualBasic;
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.Tls;
 using Security;
 using System;
@@ -14,6 +16,7 @@ using System.IO;
 
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 
 using System.Runtime.InteropServices;
@@ -28,9 +31,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WSPR_Live;
+//using WSPR_Live;
 using static System.ComponentModel.Design.ObjectSelectorEditor;
-//using Org.BouncyCastle.Crypto;
 using static WSPR_Live.LiveForm;
 
 namespace WSPR_Live
@@ -77,7 +79,7 @@ namespace WSPR_Live
         private void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            ver = "0.1.1";            
+            ver = "0.1.2";            
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -157,7 +159,7 @@ namespace WSPR_Live
         private void testDBbutton_Click(object sender, EventArgs e)
         {
             var live = new Wspr_live();
-            live.SQL_Get();
+            SQL_Get();
             //live.Get_Received(Callsign, 0, 60, 10); //find 10 entries for last 1 hour
             if (live.textBox1.Text != "" || live.Reply != "error")
             {
@@ -297,10 +299,122 @@ namespace WSPR_Live
         }
         private async void updateResults()
         {
+            MessageForm nForm = new MessageForm();
+            Msg.TCMessageBox("Please wait - retrieving local data ....", "", 20000, nForm);
             await show_results(db_server, db_user, db_pass);
+            nForm.Dispose();
         }
 
-        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan)
+        public async void SQL_Get()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                var response = await client.GetStringAsync("http://db1.wspr.live/?query=SELECT%20version()");
+                if (response != "" || response != null)
+                {
+
+                    MessageBox.Show("SQL version: " + response + " - successful GET");
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Error connecting");
+            }
+        }
+        public async Task<bool> checkSQL()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                var response = await client.GetStringAsync("http://db1.wspr.live/?query=SELECT%20version()");
+                if (response != "" || response != null)
+                {
+                    return true;
+
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return false;
+        }
+        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int limit)             
+        {
+            //note: band not currently used
+            textBox1.Multiline = true;
+            bool isUnlocked = false;
+            int tries = 0;
+
+            while (!isUnlocked)
+            {
+                //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
+                MessageForm nForm = new MessageForm();
+                Msg.TCMessageBox("Please wait - retrieving live data ....", "", 20000, nForm);
+                try
+                {
+                    
+                    int band = 0;
+
+                    if (stopUrl)
+                    {
+                        return;
+                    }
+                    if (!await checkSQL())
+                    {
+                        return;
+                    }
+                    using var client = new HttpClient();
+
+                    string baseUrl = "http://db1.wspr.live/";
+                    string sqlQuery = $"SELECT * FROM wspr.rx WHERE tx_sign LIKE '%{call}%' AND time >= subtractMinutes(now(), {timespan}) AND time <= subtractMinutes(now(), 2) LIMIT {limit}";
+                    string encodedQuery = Uri.EscapeDataString(sqlQuery);
+                    string requestUrl = $"{baseUrl}?query={encodedQuery}";                
+
+                    using var stream = await client.GetStreamAsync(requestUrl);
+                    using var reader = new StreamReader(stream);
+                  
+                    string line = "";
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        await process_data(line);
+                        await Save_Received(server, db_user, db_pass);
+
+                    }
+                    isUnlocked = true;
+                    /*while (!reader.EndOfStream)
+                    {
+                        line = await reader.ReadLineAsync();
+                      
+                        await process_data(line);
+                        await Save_Received(server, db_user, db_pass);
+
+                    }*/
+
+                    await Task.Delay(1000);
+
+                    await show_results(server, db_user, db_pass);
+
+
+                }
+                catch
+                {
+                    if (tries > 3)
+                    {                      
+                        isUnlocked = true;
+                        nForm.Dispose();
+                        return;
+                    }
+                    Thread.Sleep(800);
+                    tries++;
+
+                }
+                nForm.Dispose();
+            }
+
+        }
+        public async Task get_results_old(string call, string freq, string server, string db_user, string db_pass, int timespan)
         {
             //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
             MessageForm nForm = new MessageForm();
@@ -344,6 +458,8 @@ namespace WSPR_Live
             nForm.Dispose();
 
         }
+
+        
 
         private async Task show_results(string server, string user, string pass) // read back from the reported table to populate the datagridview
         {
@@ -963,8 +1079,8 @@ namespace WSPR_Live
                     Msg.TMessageBox("Internet is disabled", "", 2000);
                     return;
                 }
-                var live = new Wspr_live();
-                if (!await live.checkSQL())
+               
+                if (!await checkSQL())
                 {
                     Msg.TMessageBox("Cannot connect to wspr.live ...", "Error connecting", 3500);
                     return;
