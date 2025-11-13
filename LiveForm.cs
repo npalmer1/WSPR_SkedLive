@@ -76,7 +76,7 @@ namespace WSPR_Live
             //dataGridView1.Font = new System.Drawing.Font("Consolas", 9); // Set font to Arial with size 12
         }
 
-        private void LiveForm_Load(object sender, EventArgs e)
+        private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
             ver = "0.1.2";
@@ -107,6 +107,8 @@ namespace WSPR_Live
             db_user = "admin";
             getUserandPassword();
             set_header(call, db_server, db_user, db_pass);
+            await Task.Delay(2000);
+            await updateNow();
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
         {
