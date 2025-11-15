@@ -79,7 +79,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            ver = "0.1.2";
+            ver = "0.1.3";
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -108,7 +108,8 @@ namespace WSPR_Live
             getUserandPassword();
             set_header(call, db_server, db_user, db_pass);
             await Task.Delay(2000);
-            await updateNow();
+            int min = 10;
+            await updateNow(min);
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
         {
@@ -342,7 +343,7 @@ namespace WSPR_Live
             }
             return false;
         }
-        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int limit)
+        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan)
         {
             //note: band not currently used
             textBox1.Multiline = true;
@@ -367,10 +368,12 @@ namespace WSPR_Live
                     {
                         return;
                     }
+
+                    //note livelimit  is 1000 - max number of entries to extract from wspr.live database
                     using var client = new HttpClient();
 
                     string baseUrl = "http://db1.wspr.live/";
-                    string sqlQuery = $"SELECT * FROM wspr.rx WHERE tx_sign LIKE '%{call}%' AND time >= subtractMinutes(now(), {timespan}) AND time <= subtractMinutes(now(), 2) LIMIT {limit}";
+                    string sqlQuery = $"SELECT * FROM wspr.rx WHERE tx_sign LIKE '%{call}%' AND time >= subtractMinutes(now(), {timespan}) AND time <= subtractMinutes(now(), 2) LIMIT {liveLimit}";
                     string encodedQuery = Uri.EscapeDataString(sqlQuery);
                     string requestUrl = $"{baseUrl}?query={encodedQuery}";
 
@@ -502,7 +505,7 @@ namespace WSPR_Live
                         {
                             found = true;
 
-                            if (i < maxrows && i < tablecount)    //only show first maxrows rows, or to length of reported table
+                            if (i < maxrows-1 && i < tablecount-1)    //only show first maxrows rows, or to length of reported table
                             {
 
                                 RX.time = (DateTime)Reader["time"];
@@ -1009,12 +1012,11 @@ namespace WSPR_Live
 
         private async void Nowbutton_Click(object sender, EventArgs e)
         {
-
-            updateNow();
-        }
-        private async Task updateNow()
-        {
             int min = 30;
+            updateNow(min);
+        }
+        private async Task updateNow(int min)
+        {           
             try
             {
                 if (PlistBox.SelectedIndex > -1)
@@ -1063,7 +1065,7 @@ namespace WSPR_Live
             try
             {
                 int p = PlistBox.SelectedIndex;
-                int i = 0;
+                int i = 10;
                 switch (p)
                 {
                     case 0:
@@ -1088,14 +1090,14 @@ namespace WSPR_Live
                         i = 1440;
                         break;
                     default:
-                        i = 0;
+                        i = 10;
                         break;
                 }
                 return i;
             }
             catch
             {
-                return 0;
+                return 10;
             }
 
         }
