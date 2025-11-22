@@ -57,7 +57,7 @@ namespace WSPR_Live
         string slash = "\\"; //default to Windows
 
         int startCount = 0;
-        int startCountMax = 6; //360; //<6 mins
+        int startCountMax = 5; //300; //<5 mins
 
         string db_server = "127.0.0.1";
         string db_user = "admin";
@@ -1021,7 +1021,7 @@ namespace WSPR_Live
             {
                 if (PlistBox.SelectedIndex > -1)
                 {
-                    min = findP();
+                    min = findPeriod();
                 }
                 string url = "http://db1.wspr.live";
                 if (stopUrl)
@@ -1060,7 +1060,7 @@ namespace WSPR_Live
             }
         }
 
-        private int findP()
+        private int findPeriod()
         {
             try
             {
