@@ -115,7 +115,7 @@
             // 
             // dateTimePicker2
             // 
-            dateTimePicker2.Location = new Point(778, 510);
+            dateTimePicker2.Location = new Point(795, 509);
             dateTimePicker2.Name = "dateTimePicker2";
             dateTimePicker2.Size = new Size(137, 23);
             dateTimePicker2.TabIndex = 6;
@@ -123,7 +123,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(751, 514);
+            label1.Location = new Point(768, 513);
             label1.Name = "label1";
             label1.Size = new Size(21, 15);
             label1.TabIndex = 7;
@@ -141,9 +141,8 @@
             // bandlistBox
             // 
             bandlistBox.FormattingEnabled = true;
-            bandlistBox.ItemHeight = 15;
             bandlistBox.Items.AddRange(new object[] { "All", "LF", "MF", "160m", "80m", "60m", "40m", "30m", "20m", "17m", "15m", "12m", "10m", "6m", "4m", "2m", "70cm", "23cm" });
-            bandlistBox.Location = new Point(325, 514);
+            bandlistBox.Location = new Point(309, 514);
             bandlistBox.Name = "bandlistBox";
             bandlistBox.Size = new Size(70, 19);
             bandlistBox.TabIndex = 11;
@@ -151,7 +150,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(282, 516);
+            label5.Location = new Point(266, 516);
             label5.Name = "label5";
             label5.Size = new Size(37, 15);
             label5.TabIndex = 12;
@@ -159,7 +158,7 @@
             // 
             // filterbutton
             // 
-            filterbutton.Location = new Point(931, 510);
+            filterbutton.Location = new Point(951, 514);
             filterbutton.Name = "filterbutton";
             filterbutton.Size = new Size(66, 23);
             filterbutton.TabIndex = 13;
@@ -170,11 +169,11 @@
             // datecheckBox
             // 
             datecheckBox.AutoSize = true;
-            datecheckBox.Location = new Point(434, 513);
+            datecheckBox.Location = new Point(397, 514);
             datecheckBox.Name = "datecheckBox";
-            datecheckBox.Size = new Size(114, 19);
+            datecheckBox.Size = new Size(143, 19);
             datecheckBox.TabIndex = 14;
-            datecheckBox.Text = "Enable date filter";
+            datecheckBox.Text = "Enable date/time filter";
             datecheckBox.UseVisualStyleBackColor = true;
             // 
             // DFromtextBox
@@ -398,7 +397,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(116, 516);
+            label4.Location = new Point(100, 515);
             label4.Name = "label4";
             label4.Size = new Size(160, 15);
             label4.TabIndex = 10;
@@ -407,7 +406,6 @@
             // PlistBox
             // 
             PlistBox.FormattingEnabled = true;
-            PlistBox.ItemHeight = 15;
             PlistBox.Items.AddRange(new object[] { "10 min", "30 min", "1 hour", "3 hours", "6 hours", "12 hours", "24 hours" });
             PlistBox.Location = new Point(137, 573);
             PlistBox.Name = "PlistBox";
@@ -444,7 +442,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(1028, 604);
+            ClientSize = new Size(1038, 604);
             Controls.Add(Plabel);
             Controls.Add(label8);
             Controls.Add(PlistBox);

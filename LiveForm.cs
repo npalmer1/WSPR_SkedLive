@@ -1004,7 +1004,7 @@ namespace WSPR_Live
         private void callFiltertextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Allow only letters, digits, and basic punctuation
-            if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_ ".Contains(e.KeyChar))
+            if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_*".Contains(e.KeyChar))
             {
                 e.Handled = true; // Block the character
             }
