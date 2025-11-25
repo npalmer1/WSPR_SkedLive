@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.IO;
 
@@ -42,9 +43,9 @@ namespace WSPR_Live
 
 
 
-        public string call = "G4GCI";
+        public string originalcall = "G4GCI";
         private string[] cells = new string[20];
-        private string Callsign = "";
+        private string Callsign = "G4GCI";
         private bool databaseError = false;
 
         int timespan = 10; //timespan x minutes
@@ -64,10 +65,15 @@ namespace WSPR_Live
         string db_pass = "wspr";
         string ver = "";
 
+        string headerline = "";
+
+        bool owncall = true;    //use own call not other call
+
         MessageClass Msg = new MessageClass();
 
         public bool stopUrl = false;
         private static readonly object _lock = new object();
+       
         public LiveForm()
         {
 
@@ -79,7 +85,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            ver = "0.1.3";
+            ver = "0.1.4";
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -106,15 +112,16 @@ namespace WSPR_Live
             db_server = "127.0.0.1";
             db_user = "admin";
             getUserandPassword();
-            set_header(call, db_server, db_user, db_pass);
+            set_header(Callsign, db_server, db_user, db_pass);
             await Task.Delay(2000);
             int min = 10;
-            await updateNow(min);
+            await updateNow(min, false);
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
         {
-            this.Text = "Received transmissions for: " + call + "                WSPR Scheduler Live  V." + ver + "    GNU GPLv3 License"; ;
-            Callsign = call;
+            headerline = "Received transmissions for: " + call + "                WSPR Scheduler Live  V." + ver + "    GNU GPLv3 License"; ;
+            this.Text = headerline;
+            originalcall = call;
 
             dataGridView1.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dataGridView1.Columns[4].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -226,7 +233,7 @@ namespace WSPR_Live
                                     dbcall = dbcall.Replace("db_call: ", "").Trim();
                                     if (dbcall != null && dbcall != "")
                                     {
-                                        call = dbcall;
+                                        Callsign = dbcall;
                                     }
                                 }
                             }
@@ -343,18 +350,23 @@ namespace WSPR_Live
             }
             return false;
         }
-        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan)
+        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan, bool owncall)
         {
             //note: band not currently used
-            textBox1.Multiline = true;
+
             bool isUnlocked = false;
             int tries = 0;
+            if (updatecheckBox.Checked)
+            {
+                Msg.TMessageBox("Updates disabled", "", 2000);
+                return;
+            }
 
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
                 MessageForm nForm = new MessageForm();
-                Msg.TCMessageBox("Please wait - retrieving live data ....", "", 20000, nForm);
+                Msg.TCMessageBox("Please wait - retrieving live data ....", "", 30000, nForm);
                 try
                 {
 
@@ -381,25 +393,34 @@ namespace WSPR_Live
                     using var reader = new StreamReader(stream);
 
                     string line = "";
+
+                    dataGridView1.Rows.Clear();
+                    dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                                                                                                 //DateTime dt = DateTime.Now.ToUniversalTime();
+                                                                                                 //dt = dt.AddHours(-2);
+                                                                                                 // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
                     while ((line = reader.ReadLine()) != null)
                     {
                         await process_data(line);
-                        await Save_Received(server, db_user, db_pass);
+                        if (owncall) 
+                        { 
+                            await Save_Received(server, db_user, db_pass); 
+                        }
+                        else //if other call then just fill grid
+                        {
+                            fill_cells();
+                        }
 
                     }
-                    isUnlocked = true;
-                    /*while (!reader.EndOfStream)
-                    {
-                        line = await reader.ReadLineAsync();
-                      
-                        await process_data(line);
-                        await Save_Received(server, db_user, db_pass);
+                   
 
-                    }*/
+                    isUnlocked = true;
+                  
 
                     await Task.Delay(1000);
 
-                    await show_results(server, db_user, db_pass);
+                    if (owncall) { await show_results(server, db_user, db_pass); }
+                    dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
 
 
                 }
@@ -426,19 +447,13 @@ namespace WSPR_Live
         private async Task show_results(string server, string user, string pass) // read back from the reported table to populate the datagridview
         {
             try
-            {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
-                                                                                             //DateTime dt = DateTime.Now.ToUniversalTime();
-                                                                                             //dt = dt.AddHours(-2);
-                                                                                             // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
+            {                                          
                 int rows = table_count(server, user, pass);
                 if (rows > 0)
                 {
                     await find_received(rows);
 
-                }
-                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                }             
             }
             catch
             {
@@ -505,7 +520,7 @@ namespace WSPR_Live
                         {
                             found = true;
 
-                            if (i < maxrows-1 && i < tablecount-1)    //only show first maxrows rows, or to length of reported table
+                            if (i < maxrows - 1 && i < tablecount - 1)    //only show first maxrows rows, or to length of reported table
                             {
 
                                 RX.time = (DateTime)Reader["time"];
@@ -522,31 +537,8 @@ namespace WSPR_Live
                                 RX.drift = (Int16)Reader["drift"];
                                 RX.version = (string)Reader["version"];
 
-
-                                cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
-                                cells[1] = RX.tx_sign; //tx sign
-                                double f = Convert.ToDouble(RX.frequency);
-                                f = f / 1000000;
-                                string formattedF = f.ToString("F6");
-                                cells[2] = formattedF; //freq
-                                string snr = Convert.ToString(RX.snr);
-                                if (RX.snr > 0)
-                                {
-                                    snr = "+" + snr;
-                                }
-                                cells[3] = snr;  //snr
-                                cells[4] = RX.drift.ToString();  //drift
-                                cells[5] = RX.tx_loc;  //tx loc
-                                cells[6] = RX.power.ToString();   //power dBm
-                                cells[7] = RX.rx_sign;  //reporter
-                                cells[8] = RX.rx_loc;    //rx loc
-
-                                cells[9] = RX.distance.ToString();   //km
-                                int km = Convert.ToInt32(RX.distance);    //miles
-                                cells[10] = convert_to_miles(km);
-                                cells[11] = RX.azimuth.ToString();
-                                cells[12] = RX.version;   //version
-                                update_grid(); //add this row to the datagridview
+                                fill_cells();
+                               
                                 i++;
                             }
                             else
@@ -572,6 +564,34 @@ namespace WSPR_Live
                 }
             }
             return found;
+        }
+
+        private void fill_cells()
+        {
+            cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
+            cells[1] = RX.tx_sign; //tx sign
+            double f = Convert.ToDouble(RX.frequency);
+            f = f / 1000000;
+            string formattedF = f.ToString("F6");
+            cells[2] = formattedF; //freq
+            string snr = Convert.ToString(RX.snr);
+            if (RX.snr > 0)
+            {
+                snr = "+" + snr;
+            }
+            cells[3] = snr;  //snr
+            cells[4] = RX.drift.ToString();  //drift
+            cells[5] = RX.tx_loc;  //tx loc
+            cells[6] = RX.power.ToString();   //power dBm
+            cells[7] = RX.rx_sign;  //reporter
+            cells[8] = RX.rx_loc;    //rx loc
+
+            cells[9] = RX.distance.ToString();   //km
+            int km = Convert.ToInt32(RX.distance);    //miles
+            cells[10] = convert_to_miles(km);
+            cells[11] = RX.azimuth.ToString();
+            cells[12] = RX.version;   //version
+            update_grid(); //add this row to the datagridview
         }
 
 
@@ -836,18 +856,20 @@ namespace WSPR_Live
         public async Task Save_Received(string serverName, string db_user, string db_pass)
         {
 
-            string myConnectionString = "server=" + serverName + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
-            MySqlConnection connection = new MySqlConnection(myConnectionString);
             DateTime date = new DateTime();
+
+            string myConnectionString = "server=" + serverName + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
+            MySqlConnection connection = new MySqlConnection();
+            connection.ConnectionString = myConnectionString;
             MySqlCommand command = connection.CreateCommand();
+
             lock (_lock)
             {
                 try
                 {
-
+                    
                     command.CommandText = "INSERT IGNORE INTO reported(id,time,band,rx_sign,rx_lat,rx_lon,rx_loc,tx_sign,tx_lat,tx_lon,tx_loc,distance,azimuth,rx_azimuth,frequency,power,snr,drift,version,code) ";
                     command.CommandText += "VALUES(@id,@time,@band,@rx_sign,@rx_lat,@rx_lon,@rx_loc,@tx_sign,@tx_lat,@tx_lon,@tx_loc,@distance,@azimuth,@rx_azimuth,@frequency,@power,@snr,@drift,@version,@code)";
-
                     connection.Open();
 
                     //TimeSpan time = Convert.ToDateTime(cells[1]);
@@ -872,7 +894,6 @@ namespace WSPR_Live
                     command.Parameters.AddWithValue("@version", RX.version);
                     command.Parameters.AddWithValue("@code", RX.code);
                     command.ExecuteNonQuery();
-
 
                     connection.Close();
 
@@ -1013,10 +1034,15 @@ namespace WSPR_Live
         private async void Nowbutton_Click(object sender, EventArgs e)
         {
             int min = 30;
-            updateNow(min);
+            updateNow(min, true);
         }
-        private async Task updateNow(int min)
-        {           
+        private async Task updateNow(int min, bool wait)
+        {
+            if (updatecheckBox.Checked)
+            {
+                Msg.TMessageBox("Updates disabled", "", 2000);
+                return;
+            }
             try
             {
                 if (PlistBox.SelectedIndex > -1)
@@ -1039,7 +1065,7 @@ namespace WSPR_Live
                 if (!timer1.Enabled)
                 {
 
-                    await get_results(Callsign, freq, db_server, db_user, db_pass, min);
+                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
 
                     PlistBox.SelectedIndex = 0;
@@ -1049,10 +1075,13 @@ namespace WSPR_Live
 
                     return;
                 }
-                timer1.Interval = 120000;
-                timer1.Enabled = true;
-                timer1.Start(); //prevent multiple presses within 2 minutes
-                Nowbutton.Text = "Wait ...";
+                if (wait)
+                {
+                    timer1.Interval = 120000;
+                    timer1.Enabled = true;
+                    timer1.Start(); //prevent multiple presses within 2 minutes
+                    Nowbutton.Text = "Wait ...";
+                }
             }
             catch
             {
@@ -1125,12 +1154,13 @@ namespace WSPR_Live
         }
         private async void updatePassandCall()
         {
+
             string freq = "";
             startCount++;
             if (startCount > startCountMax)  //X minutes
             {
                 startCount = 0;
-                get_results(call, freq, db_server, db_user, db_pass, 10);
+                get_results(Callsign, freq, db_server, db_user, db_pass, 10, owncall);
 
             }
 
@@ -1141,6 +1171,51 @@ namespace WSPR_Live
         private void testDBbutton_Click(object sender, EventArgs e)
         {
             testDB();
+        }
+
+        private void calltextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (calltextBox.Text == "")
+            {
+                Callsign = originalcall;
+            }
+            else
+            {
+                Callsign = calltextBox.Text.Trim().ToUpper();
+            }
+            this.Text = headerline.Replace(originalcall, Callsign);
+        }
+
+        private void othercheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (othercheckBox.Checked)
+            {
+                calltextBox.Enabled = true;
+               
+                owncall = false;
+            }
+            else
+            {
+               
+                calltextBox.Enabled = false;
+                owncall = true;
+                Callsign = originalcall;
+                this.Text = headerline.Replace(originalcall, Callsign);
+            }
+        }
+
+        private void delbutton_Click(object sender, EventArgs e)
+        {
+            if (calltextBox.Text.Trim() == "")
+            {
+                return;
+            }
+            var res = Msg.ynMessageBox("Remove all records for " + calltextBox.Text + " from database (Y/N)?", "Confirm removal");
+            if (res == DialogResult.Yes)
+            {
+                //delete_received(db_server, db_user, db_pass);
+
+            }
         }
     }
 }

@@ -31,7 +31,6 @@
             components = new System.ComponentModel.Container();
             testDBbutton = new Button();
             updatebutton = new Button();
-            WXbutton = new Button();
             dateTimePicker1 = new DateTimePicker();
             dateTimePicker2 = new DateTimePicker();
             label1 = new Label();
@@ -49,7 +48,6 @@
             Ulabel = new Label();
             Dlabel = new Label();
             label7 = new Label();
-            textBox1 = new TextBox();
             Nowbutton = new Button();
             timer1 = new System.Windows.Forms.Timer(components);
             dataGridView1 = new DataGridView();
@@ -71,12 +69,16 @@
             label8 = new Label();
             Plabel = new Label();
             timer2 = new System.Windows.Forms.Timer(components);
+            updatecheckBox = new CheckBox();
+            calltextBox = new TextBox();
+            othercheckBox = new CheckBox();
+            label9 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
             // testDBbutton
             // 
-            testDBbutton.Location = new Point(751, 1);
+            testDBbutton.Location = new Point(853, 1);
             testDBbutton.Name = "testDBbutton";
             testDBbutton.Size = new Size(164, 21);
             testDBbutton.TabIndex = 0;
@@ -87,7 +89,7 @@
             // updatebutton
             // 
             updatebutton.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            updatebutton.Location = new Point(619, 1);
+            updatebutton.Location = new Point(709, 1);
             updatebutton.Margin = new Padding(0);
             updatebutton.Name = "updatebutton";
             updatebutton.Size = new Size(126, 21);
@@ -95,16 +97,6 @@
             updatebutton.Text = "Update from local db";
             updatebutton.UseVisualStyleBackColor = true;
             updatebutton.Click += updatebutton_Click;
-            // 
-            // WXbutton
-            // 
-            WXbutton.Location = new Point(942, -1);
-            WXbutton.Name = "WXbutton";
-            WXbutton.Size = new Size(75, 23);
-            WXbutton.TabIndex = 4;
-            WXbutton.Text = "button1";
-            WXbutton.UseVisualStyleBackColor = true;
-            WXbutton.Visible = false;
             // 
             // dateTimePicker1
             // 
@@ -257,20 +249,11 @@
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label7.Location = new Point(151, 1);
+            label7.Location = new Point(642, 583);
             label7.Name = "label7";
             label7.Size = new Size(390, 13);
             label7.TabIndex = 24;
             label7.Text = "To reduce traffic at wspr.live received reports may not appear for 6 minutes";
-            // 
-            // textBox1
-            // 
-            textBox1.Location = new Point(2, -1);
-            textBox1.Multiline = true;
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(100, 23);
-            textBox1.TabIndex = 25;
-            textBox1.Visible = false;
             // 
             // Nowbutton
             // 
@@ -437,17 +420,61 @@
             timer2.Interval = 60000;
             timer2.Tick += timer2_Tick;
             // 
+            // updatecheckBox
+            // 
+            updatecheckBox.AutoSize = true;
+            updatecheckBox.Location = new Point(296, 577);
+            updatecheckBox.Name = "updatecheckBox";
+            updatecheckBox.Size = new Size(257, 19);
+            updatecheckBox.TabIndex = 30;
+            updatecheckBox.Text = "Disable updates (avoid interupting a search)";
+            updatecheckBox.UseVisualStyleBackColor = true;
+            // 
+            // calltextBox
+            // 
+            calltextBox.Enabled = false;
+            calltextBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            calltextBox.Location = new Point(126, 3);
+            calltextBox.Margin = new Padding(0);
+            calltextBox.Name = "calltextBox";
+            calltextBox.Size = new Size(113, 22);
+            calltextBox.TabIndex = 32;
+            calltextBox.TextChanged += calltextBox_TextChanged;
+            // 
+            // othercheckBox
+            // 
+            othercheckBox.AutoSize = true;
+            othercheckBox.Location = new Point(12, 3);
+            othercheckBox.Name = "othercheckBox";
+            othercheckBox.Size = new Size(111, 19);
+            othercheckBox.TabIndex = 33;
+            othercheckBox.Text = "Allow other call:";
+            othercheckBox.UseVisualStyleBackColor = true;
+            othercheckBox.CheckedChanged += othercheckBox_CheckedChanged;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(242, 7);
+            label9.Name = "label9";
+            label9.Size = new Size(159, 15);
+            label9.TabIndex = 34;
+            label9.Text = "(note: not saved in database)";
+            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(1038, 604);
+            Controls.Add(label9);
+            Controls.Add(othercheckBox);
+            Controls.Add(calltextBox);
+            Controls.Add(updatecheckBox);
             Controls.Add(Plabel);
             Controls.Add(label8);
             Controls.Add(PlistBox);
             Controls.Add(Nowbutton);
-            Controls.Add(textBox1);
             Controls.Add(label7);
             Controls.Add(Dlabel);
             Controls.Add(Ulabel);
@@ -466,7 +493,6 @@
             Controls.Add(label1);
             Controls.Add(dateTimePicker2);
             Controls.Add(dateTimePicker1);
-            Controls.Add(WXbutton);
             Controls.Add(dataGridView1);
             Controls.Add(updatebutton);
             Controls.Add(testDBbutton);
@@ -482,7 +508,6 @@
 
         private System.Windows.Forms.Button testDBbutton;
         private System.Windows.Forms.Button updatebutton;
-        private System.Windows.Forms.Button WXbutton;
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
         private System.Windows.Forms.DateTimePicker dateTimePicker2;
         private System.Windows.Forms.Label label1;
@@ -500,7 +525,6 @@
         private System.Windows.Forms.Label Ulabel;
         private System.Windows.Forms.Label Dlabel;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button Nowbutton;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.DataGridView dataGridView1;
@@ -522,5 +546,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column12;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column13;
         private System.Windows.Forms.Timer timer2;
+        private CheckBox updatecheckBox;
+        private TextBox calltextBox;
+        private CheckBox othercheckBox;
+        private Label label9;
     }
 }
