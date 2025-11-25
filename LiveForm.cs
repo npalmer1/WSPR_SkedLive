@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 //using WSPR_Live;
 using static System.ComponentModel.Design.ObjectSelectorEditor;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static WSPR_Live.LiveForm;
 
 namespace WSPR_Live
@@ -73,7 +74,7 @@ namespace WSPR_Live
 
         public bool stopUrl = false;
         private static readonly object _lock = new object();
-       
+
         public LiveForm()
         {
 
@@ -87,6 +88,8 @@ namespace WSPR_Live
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
             ver = "0.1.4";
 
+            callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
+            calltextBox.CharacterCasing = CharacterCasing.Upper;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 OpSystem = 0; //Windows
@@ -304,7 +307,7 @@ namespace WSPR_Live
         private async void updateResults()
         {
             MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait - retrieving local data ....", "", 20000, nForm);
+            Msg.TCMessageBox("Please wait - retrieving local data ....", "", 30000, nForm);
             await show_results(db_server, db_user, db_pass);
             nForm.Dispose();
         }
@@ -394,17 +397,17 @@ namespace WSPR_Live
 
                     string line = "";
 
-                    dataGridView1.Rows.Clear();
-                    dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
-                                                                                                 //DateTime dt = DateTime.Now.ToUniversalTime();
-                                                                                                 //dt = dt.AddHours(-2);
-                                                                                                 // string date = dt.ToString("yyyy-MM-dd HH:mm:00");
+                    if (!owncall)
+                    {
+                        dataGridView1.Rows.Clear();
+                        dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
+                    }
                     while ((line = reader.ReadLine()) != null)
                     {
                         await process_data(line);
-                        if (owncall) 
-                        { 
-                            await Save_Received(server, db_user, db_pass); 
+                        if (owncall)
+                        {
+                            await Save_Received(server, db_user, db_pass);
                         }
                         else //if other call then just fill grid
                         {
@@ -412,15 +415,21 @@ namespace WSPR_Live
                         }
 
                     }
-                   
+
 
                     isUnlocked = true;
-                  
+
 
                     await Task.Delay(1000);
 
-                    if (owncall) { await show_results(server, db_user, db_pass); }
-                    dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                    if (owncall) 
+                    { 
+                        await show_results(server, db_user, db_pass); 
+                    }
+                    else
+                    {
+                        dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                    }
 
 
                 }
@@ -447,13 +456,17 @@ namespace WSPR_Live
         private async Task show_results(string server, string user, string pass) // read back from the reported table to populate the datagridview
         {
             try
-            {                                          
+            {
+                dataGridView1.Rows.Clear();
+                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
+
                 int rows = table_count(server, user, pass);
                 if (rows > 0)
                 {
                     await find_received(rows);
 
-                }             
+                }
+                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
             }
             catch
             {
@@ -538,7 +551,7 @@ namespace WSPR_Live
                                 RX.version = (string)Reader["version"];
 
                                 fill_cells();
-                               
+
                                 i++;
                             }
                             else
@@ -718,6 +731,10 @@ namespace WSPR_Live
 
                     if (callFiltertextBox.Text.Trim() != "")
                     {
+                        if (callFiltertextBox.Text.Contains("*"))
+                        {
+                            callFiltertextBox.Text = callFiltertextBox.Text.Replace("*", "");
+                        }
                         callstr = " AND rx_sign LIKE '" + callFiltertextBox.Text.Trim() + "%' ";
                     }
                     fromstr = DFromtextBox.Text.Trim();
@@ -758,6 +775,7 @@ namespace WSPR_Live
 
                     MySqlDataReader Reader;
                     Reader = command.ExecuteReader();
+                    
 
                     while (Reader.Read())
                     {
@@ -867,7 +885,7 @@ namespace WSPR_Live
             {
                 try
                 {
-                    
+
                     command.CommandText = "INSERT IGNORE INTO reported(id,time,band,rx_sign,rx_lat,rx_lon,rx_loc,tx_sign,tx_lat,tx_lon,tx_loc,distance,azimuth,rx_azimuth,frequency,power,snr,drift,version,code) ";
                     command.CommandText += "VALUES(@id,@time,@band,@rx_sign,@rx_lat,@rx_lon,@rx_loc,@tx_sign,@tx_lat,@tx_lon,@tx_loc,@distance,@azimuth,@rx_azimuth,@frequency,@power,@snr,@drift,@version,@code)";
                     connection.Open();
@@ -911,19 +929,31 @@ namespace WSPR_Live
         private void filterbutton_Click(object sender, EventArgs e)
         {
             MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait ....", "", 20000, nForm);
+            Msg.TCMessageBox("Please wait ....", "", 30000, nForm);
             if (filterbutton.Text == "Apply")
             {
                 filter_results(db_server, db_user, db_pass);
-                filterbutton.Text = "Clear";
+                //filterbutton.Text = "Clear";
             }
             else
             {
                 show_results(db_server, db_user, db_pass);
-                filterbutton.Text = "Apply";
+               // filterbutton.Text = "Apply";
             }
             nForm.Dispose();
         }
+
+        private void Clearbutton_Click(object sender, EventArgs e)
+        {
+            MessageForm nForm = new MessageForm();
+            Msg.TCMessageBox("Please wait ....", "", 30000, nForm);
+
+            show_results(db_server, db_user, db_pass);
+
+            nForm.Dispose();
+        }
+
+
 
         private void DFromtextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -1191,16 +1221,28 @@ namespace WSPR_Live
             if (othercheckBox.Checked)
             {
                 calltextBox.Enabled = true;
-               
+
                 owncall = false;
+                filterbutton.Visible = false;
+                Clearbutton.Visible = false;
+                if (calltextBox.Text.Trim() != "")
+                {
+                    Callsign = calltextBox.Text.ToUpper();
+                    this.Text = headerline.Replace(originalcall, Callsign);
+                }              
             }
             else
             {
-               
+
                 calltextBox.Enabled = false;
                 owncall = true;
                 Callsign = originalcall;
+                filterbutton.Visible = true;
+                Clearbutton.Visible = true;
                 this.Text = headerline.Replace(originalcall, Callsign);
+                Nowbutton.Text = "Update now";
+                timer1.Stop();
+                timer1.Enabled = false;
             }
         }
 
@@ -1217,5 +1259,7 @@ namespace WSPR_Live
 
             }
         }
+
+      
     }
 }

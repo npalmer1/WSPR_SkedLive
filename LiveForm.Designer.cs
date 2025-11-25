@@ -73,6 +73,7 @@
             calltextBox = new TextBox();
             othercheckBox = new CheckBox();
             label9 = new Label();
+            Clearbutton = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -461,12 +462,23 @@
             label9.TabIndex = 34;
             label9.Text = "(note: not saved in database)";
             // 
+            // Clearbutton
+            // 
+            Clearbutton.Location = new Point(951, 547);
+            Clearbutton.Name = "Clearbutton";
+            Clearbutton.Size = new Size(66, 23);
+            Clearbutton.TabIndex = 35;
+            Clearbutton.Text = "Clear";
+            Clearbutton.UseVisualStyleBackColor = true;
+            Clearbutton.Click += Clearbutton_Click;
+            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(1038, 604);
+            Controls.Add(Clearbutton);
             Controls.Add(label9);
             Controls.Add(othercheckBox);
             Controls.Add(calltextBox);
@@ -550,5 +562,6 @@
         private TextBox calltextBox;
         private CheckBox othercheckBox;
         private Label label9;
+        private Button Clearbutton;
     }
 }
