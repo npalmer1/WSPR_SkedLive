@@ -402,16 +402,20 @@ namespace WSPR_Live
                         dataGridView1.Rows.Clear();
                         dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
                     }
-                    while ((line = reader.ReadLine()) != null)
+                    while ((line = reader.ReadLine()) != null  || !reader.EndOfStream)
                     {
-                        await process_data(line);
-                        if (owncall)
+                        if (line != null && line != "")
                         {
-                            await Save_Received(server, db_user, db_pass);
-                        }
-                        else //if other call then just fill grid
-                        {
-                            fill_cells();
+                            await process_data(line);
+
+                            if (owncall)
+                            {
+                                await Save_Received(server, db_user, db_pass);
+                            }
+                            else //if other call then just fill grid
+                            {
+                                fill_cells();
+                            }
                         }
 
                     }
