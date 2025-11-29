@@ -124,7 +124,7 @@ namespace WSPR_Live
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
         {
-            headerline = "Received transmissions for: " + call + "                WSPR Scheduler Live  V." + ver + "    GNU GPLv3 License"; ;
+            headerline = "Received transmissions for: " + call + "                WSPR Scheduler Live  V." + vers + "    GNU GPLv3 License"; ;
             this.Text = headerline;
             originalcall = call;
 
