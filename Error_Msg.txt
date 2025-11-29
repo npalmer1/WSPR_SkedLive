@@ -1,0 +1,259 @@
+See the end of this message for details on invoking 
+just-in-time (JIT) debugging instead of this dialog box.
+
+************** Exception Text **************
+System.ArgumentException: Destination array was not long enough. Check the destination index, length, and the array's lower bounds. (Parameter 'destinationArray')
+   at System.Array.CopyImpl(Array sourceArray, Int32 sourceIndex, Array destinationArray, Int32 destinationIndex, Int32 length, Boolean reliable)
+   at System.Array.Copy(Array sourceArray, Int32 sourceIndex, Array destinationArray, Int32 destinationIndex, Int32 length)
+   at System.Windows.Forms.PropertyStore.SetObject(Int32 key, Object value)
+   at System.Windows.Forms.Control.WmDestroy(Message& m)
+   at System.Windows.Forms.Control.WndProc(Message& m)
+   at System.Windows.Forms.Label.WndProc(Message& m)
+   at System.Windows.Forms.NativeWindow.Callback(HWND hWnd, MessageId msg, WPARAM wparam, LPARAM lparam)
+
+
+************** Loaded Assemblies **************
+System.Private.CoreLib
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Private.CoreLib.dll
+----------------------------------------
+WSPR_Live
+    Assembly Version: 1.0.0.0
+    Location: C:\WSPR_Live\WSPR_Live\bin\Debug\net9.0-windows7.0\WSPR_Live.dll
+----------------------------------------
+System.Runtime
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Runtime.dll
+----------------------------------------
+System.Windows.Forms
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\System.Windows.Forms.dll
+----------------------------------------
+System.ComponentModel.Primitives
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.ComponentModel.Primitives.dll
+----------------------------------------
+System.Windows.Forms.Primitives
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\System.Windows.Forms.Primitives.dll
+----------------------------------------
+System.Private.Windows.Core
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\System.Private.Windows.Core.dll
+----------------------------------------
+System.Drawing.Primitives
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Drawing.Primitives.dll
+----------------------------------------
+System.Collections.Specialized
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Collections.Specialized.dll
+----------------------------------------
+System.Runtime.InteropServices
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Runtime.InteropServices.dll
+----------------------------------------
+System.Threading
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Threading.dll
+----------------------------------------
+System.Collections
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Collections.dll
+----------------------------------------
+System.Data.Common
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Data.Common.dll
+----------------------------------------
+System.ComponentModel.TypeConverter
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.ComponentModel.TypeConverter.dll
+----------------------------------------
+System.ComponentModel
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.ComponentModel.dll
+----------------------------------------
+System.Xml.ReaderWriter
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Xml.ReaderWriter.dll
+----------------------------------------
+System.Private.Xml
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Private.Xml.dll
+----------------------------------------
+System.Drawing.Common
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\System.Drawing.Common.dll
+----------------------------------------
+Microsoft.Win32.Primitives
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\Microsoft.Win32.Primitives.dll
+----------------------------------------
+System.ComponentModel.EventBasedAsync
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.ComponentModel.EventBasedAsync.dll
+----------------------------------------
+System.Threading.Thread
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Threading.Thread.dll
+----------------------------------------
+Accessibility
+    Assembly Version: 4.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\Accessibility.dll
+----------------------------------------
+System.Runtime.Loader
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Runtime.Loader.dll
+----------------------------------------
+System.Numerics.Vectors
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Numerics.Vectors.dll
+----------------------------------------
+System.Linq
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Linq.dll
+----------------------------------------
+System.Memory
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Memory.dll
+----------------------------------------
+Microsoft.Win32.SystemEvents
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\Microsoft.Win32.SystemEvents.dll
+----------------------------------------
+System.Collections.Concurrent
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Collections.Concurrent.dll
+----------------------------------------
+System.ObjectModel
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.ObjectModel.dll
+----------------------------------------
+System.Private.Uri
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Private.Uri.dll
+----------------------------------------
+System.Collections.NonGeneric
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Collections.NonGeneric.dll
+----------------------------------------
+System.Security.Cryptography
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Security.Cryptography.dll
+----------------------------------------
+System.Threading.ThreadPool
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Threading.ThreadPool.dll
+----------------------------------------
+System.Net.Http
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.Http.dll
+----------------------------------------
+System.Net.Primitives
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.Primitives.dll
+----------------------------------------
+System.Diagnostics.Tracing
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Diagnostics.Tracing.dll
+----------------------------------------
+System.Diagnostics.DiagnosticSource
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Diagnostics.DiagnosticSource.dll
+----------------------------------------
+System.Net.Security
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.Security.dll
+----------------------------------------
+Microsoft.Win32.Registry
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\Microsoft.Win32.Registry.dll
+----------------------------------------
+System.Net.Sockets
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.Sockets.dll
+----------------------------------------
+System.Threading.Overlapped
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Threading.Overlapped.dll
+----------------------------------------
+System.Net.NameResolution
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.NameResolution.dll
+----------------------------------------
+System.Runtime.Intrinsics
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Runtime.Intrinsics.dll
+----------------------------------------
+MySql.Data
+    Assembly Version: 9.5.0.0
+    Location: C:\WSPR_Live\WSPR_Live\bin\Debug\net9.0-windows7.0\MySql.Data.dll
+----------------------------------------
+System.Transactions.Local
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Transactions.Local.dll
+----------------------------------------
+System.Text.RegularExpressions
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Text.RegularExpressions.dll
+----------------------------------------
+System.Security.Permissions
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\System.Security.Permissions.dll
+----------------------------------------
+System.Configuration.ConfigurationManager
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App\9.0.11\System.Configuration.ConfigurationManager.dll
+----------------------------------------
+System.Net.WebClient
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.WebClient.dll
+----------------------------------------
+System.Text.Encoding.Extensions
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Text.Encoding.Extensions.dll
+----------------------------------------
+System.Security.Principal.Windows
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Security.Principal.Windows.dll
+----------------------------------------
+System.Security.Claims
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Security.Claims.dll
+----------------------------------------
+System.Diagnostics.Process
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Diagnostics.Process.dll
+----------------------------------------
+System.Text.Encoding.CodePages
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Text.Encoding.CodePages.dll
+----------------------------------------
+System.Diagnostics.TraceSource
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Diagnostics.TraceSource.dll
+----------------------------------------
+System.Net.Quic
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.Quic.dll
+----------------------------------------
+System.Net.NetworkInformation
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Net.NetworkInformation.dll
+----------------------------------------
+System.Diagnostics.StackTrace
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Diagnostics.StackTrace.dll
+----------------------------------------
+System.Reflection.Metadata
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Reflection.Metadata.dll
+----------------------------------------
+System.Collections.Immutable
+    Assembly Version: 9.0.0.0
+    Location: C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.11\System.Collections.Immutable.dll
+----------------------------------------
+
+************** JIT Debugging **************
+
+

@@ -64,7 +64,8 @@ namespace WSPR_Live
         string db_server = "127.0.0.1";
         string db_user = "admin";
         string db_pass = "wspr";
-        string ver = "";
+        string vers = "";
+        int ver = 015; //version 0.1.5
 
         string headerline = "";
 
@@ -86,7 +87,8 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            ver = "0.1.4";
+            vers = "0.1.5";
+            ver = 015;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -293,11 +295,18 @@ namespace WSPR_Live
 
         private string convert_to_miles(int km)
         {
-            int m = 0;
-            double miles = 0;
-            miles = km * 0.621371;
-            m = Convert.ToInt32(miles);
-            return m.ToString();
+            try
+            {
+                int m = 0;
+                double miles = 0;
+                miles = km * 0.621371;
+                m = Convert.ToInt32(miles);
+                return m.ToString();
+            }
+            catch
+            {
+                return "0";
+            }
         }
 
         private void updatebutton_Click(object sender, EventArgs e)
@@ -481,7 +490,7 @@ namespace WSPR_Live
 
         private int table_count(string server, string user, string pass)
         {
-            int count;
+            int count = 0;
             string connectionString = "server=" + server + ";user id=" + user + ";password=" + pass + ";database=wspr_rx";
             var connection = new MySqlConnection(connectionString);
             try
@@ -585,29 +594,36 @@ namespace WSPR_Live
 
         private void fill_cells()
         {
-            cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
-            cells[1] = RX.tx_sign; //tx sign
-            double f = Convert.ToDouble(RX.frequency);
-            f = f / 1000000;
-            string formattedF = f.ToString("F6");
-            cells[2] = formattedF; //freq
-            string snr = Convert.ToString(RX.snr);
-            if (RX.snr > 0)
+            try
             {
-                snr = "+" + snr;
-            }
-            cells[3] = snr;  //snr
-            cells[4] = RX.drift.ToString();  //drift
-            cells[5] = RX.tx_loc;  //tx loc
-            cells[6] = RX.power.ToString();   //power dBm
-            cells[7] = RX.rx_sign;  //reporter
-            cells[8] = RX.rx_loc;    //rx loc
+                cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
+                cells[1] = RX.tx_sign; //tx sign
+                double f = Convert.ToDouble(RX.frequency);
+                f = f / 1000000;
+                string formattedF = f.ToString("F6");
+                cells[2] = formattedF; //freq
+                string snr = Convert.ToString(RX.snr);
+                if (RX.snr > 0)
+                {
+                    snr = "+" + snr;
+                }
+                cells[3] = snr;  //snr
+                cells[4] = RX.drift.ToString();  //drift
+                cells[5] = RX.tx_loc;  //tx loc
+                cells[6] = RX.power.ToString();   //power dBm
+                cells[7] = RX.rx_sign;  //reporter
+                cells[8] = RX.rx_loc;    //rx loc
 
-            cells[9] = RX.distance.ToString();   //km
-            int km = Convert.ToInt32(RX.distance);    //miles
-            cells[10] = convert_to_miles(km);
-            cells[11] = RX.azimuth.ToString();
-            cells[12] = RX.version;   //version
+                cells[9] = RX.distance.ToString();   //km
+                int km = Convert.ToInt32(RX.distance);    //miles
+                cells[10] = convert_to_miles(km);
+                cells[11] = RX.azimuth.ToString();
+                cells[12] = RX.version;   //version
+            }
+            catch
+            {
+
+            }
             update_grid(); //add this row to the datagridview
         }
 
@@ -961,43 +977,49 @@ namespace WSPR_Live
 
         private void DFromtextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Allow only letters, digits, and basic punctuation
-            if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_ ".Contains(e.KeyChar))
+            try
             {
-                e.Handled = true; // Block the character
-                return;
-            }
-            int maxDistance = 20000; //35km short of max
-            string maxstr = "20000";
-            if (!kmcheckBox.Checked)
-            {
-                maxstr = convert_to_miles(maxDistance);
-            }
-            int maxD = Convert.ToInt32(maxstr);
-            int t;
-            if (e.KeyChar == 45) //no minus allowed
-            {
-                e.Handled = true;
-                return;
-            }
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) //will allow offset from -10 to +210 for adjustment
-            {
-                e.Handled = true;
-            }
-
-            // Allow only letters, digits, and basic punctuation
-            if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_ ".Contains(e.KeyChar))
-            {
-                e.Handled = true; // Block the character
-            }
-            else
-            {
-                int.TryParse(DFromtextBox.Text + e.KeyChar, out t);
-                if (t < 0 || t > maxD)
+                // Allow only letters, digits, and basic punctuation
+                if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_ ".Contains(e.KeyChar))
                 {
-                    MessageBox.Show("Error: range 0-" + maxD, "");
+                    e.Handled = true; // Block the character
+                    return;
+                }
+                int maxDistance = 20000; //35km short of max
+                string maxstr = "20000";
+                if (!kmcheckBox.Checked)
+                {
+                    maxstr = convert_to_miles(maxDistance);
+                }
+                int maxD = Convert.ToInt32(maxstr);
+                int t;
+                if (e.KeyChar == 45) //no minus allowed
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) //will allow offset from -10 to +210 for adjustment
+                {
                     e.Handled = true;
                 }
+
+                // Allow only letters, digits, and basic punctuation
+                if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_ ".Contains(e.KeyChar))
+                {
+                    e.Handled = true; // Block the character
+                }
+                else
+                {
+                    int.TryParse(DFromtextBox.Text + e.KeyChar, out t);
+                    if (t < 0 || t > maxD)
+                    {
+                        MessageBox.Show("Error: range 0-" + maxD, "");
+                        e.Handled = true;
+                    }
+                }
+            }
+            catch
+            {
             }
         }
 
@@ -1017,37 +1039,44 @@ namespace WSPR_Live
 
         private void DTotextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Allow only letters, digits, and basic punctuation
-            if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_ ".Contains(e.KeyChar))
+            try
             {
-                e.Handled = true; // Block the character
-                return;
-            }
-            int maxDistance = 20035; //half circumference of earth
-            string maxstr = "20035";
-            if (!kmcheckBox.Checked)
-            {
-                maxstr = convert_to_miles(maxDistance);
-            }
-            int maxD = Convert.ToInt32(maxstr);
-            int t;
-            if (e.KeyChar == 45) //no minus allowed
-            {
-                e.Handled = true;
-                return;
-            }
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) //will also accept - offset up to -10 and +ve up to 210
-            {
-                e.Handled = true;
-            }
-            else
-            {
-                int.TryParse(DTotextBox.Text + e.KeyChar, out t);
-                if (t < 0 || t > maxD)
+                // Allow only letters, digits, and basic punctuation
+                if (!char.IsLetterOrDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && !".,-_ ".Contains(e.KeyChar))
                 {
-                    MessageBox.Show("Error: range 10-" + maxD, "");
+                    e.Handled = true; // Block the character
+                    return;
+                }
+                int maxDistance = 20035; //half circumference of earth
+                string maxstr = "20035";
+                if (!kmcheckBox.Checked)
+                {
+                    maxstr = convert_to_miles(maxDistance);
+                }
+                int maxD = Convert.ToInt32(maxstr);
+                int t;
+                if (e.KeyChar == 45) //no minus allowed
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) //will also accept - offset up to -10 and +ve up to 210
+                {
                     e.Handled = true;
                 }
+                else
+                {
+                    int.TryParse(DTotextBox.Text + e.KeyChar, out t);
+                    if (t < 0 || t > maxD)
+                    {
+                        MessageBox.Show("Error: range 10-" + maxD, "");
+                        e.Handled = true;
+                    }
+                }
+            }
+            catch
+            {
+
             }
         }
 
@@ -1179,7 +1208,10 @@ namespace WSPR_Live
 
         private void PlistBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Plabel.Text = PlistBox.SelectedItem.ToString();
+            if (PlistBox.SelectedIndex > -1)
+            {
+                Plabel.Text = PlistBox.SelectedItem.ToString();
+            }            
         }
 
         private void timer2_Tick(object sender, EventArgs e)
