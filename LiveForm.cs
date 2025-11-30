@@ -87,8 +87,8 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.5";
-            ver = 015;
+            vers = "0.1.6";
+            ver = 016;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -548,7 +548,7 @@ namespace WSPR_Live
 
                             if (i < maxrows - 1 && i < tablecount - 1)    //only show first maxrows rows, or to length of reported table
                             {
-
+                                RX.rx_sign = "";
                                 RX.time = (DateTime)Reader["time"];
                                 RX.band = (Int16)Reader["band"];
                                 RX.rx_sign = (string)Reader["rx_sign"];
@@ -562,8 +562,10 @@ namespace WSPR_Live
                                 RX.snr = (Int16)Reader["snr"];
                                 RX.drift = (Int16)Reader["drift"];
                                 RX.version = (string)Reader["version"];
-
-                                fill_cells();
+                                if (RX.rx_sign != "" && RX.rx_sign != null)
+                                {
+                                    fill_cells();
+                                }
 
                                 i++;
                             }
@@ -803,7 +805,7 @@ namespace WSPR_Live
 
                         if (i < maxrows && i < tablecount)   //only show first maxrows rows, or to length of reported table
                         {
-
+                            RX.rx_sign = "";
                             RX.time = (DateTime)Reader["time"];
                             RX.band = (Int16)Reader["band"];
                             RX.rx_sign = (string)Reader["rx_sign"];
@@ -818,31 +820,34 @@ namespace WSPR_Live
                             RX.drift = (Int16)Reader["drift"];
                             RX.version = (string)Reader["version"];
 
-
-                            cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
-                            cells[1] = RX.tx_sign; //tx sign
-                            double f = Convert.ToDouble(RX.frequency);
-                            f = f / 1000000;
-                            string formattedF = f.ToString("F6");
-                            cells[2] = formattedF; //freq
-                            string snr = Convert.ToString(RX.snr);
-                            if (RX.snr > 0)
+                            if (RX.rx_sign != "" && RX.rx_sign != null)
                             {
-                                snr = "+" + snr;
-                            }
-                            cells[3] = snr;  //snr
-                            cells[4] = RX.drift.ToString();  //drift
-                            cells[5] = RX.tx_loc;  //tx loc
-                            cells[6] = RX.power.ToString();   //power dBm
-                            cells[7] = RX.rx_sign;  //reporter
-                            cells[8] = RX.rx_loc;    //rx loc
 
-                            cells[9] = RX.distance.ToString();   //km
-                            int km = Convert.ToInt32(RX.distance);    //miles
-                            cells[10] = convert_to_miles(km);
-                            cells[11] = RX.azimuth.ToString();
-                            cells[12] = RX.version;   //version
-                            update_grid(); //add this row to the datagridview
+                                cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
+                                cells[1] = RX.tx_sign; //tx sign
+                                double f = Convert.ToDouble(RX.frequency);
+                                f = f / 1000000;
+                                string formattedF = f.ToString("F6");
+                                cells[2] = formattedF; //freq
+                                string snr = Convert.ToString(RX.snr);
+                                if (RX.snr > 0)
+                                {
+                                    snr = "+" + snr;
+                                }
+                                cells[3] = snr;  //snr
+                                cells[4] = RX.drift.ToString();  //drift
+                                cells[5] = RX.tx_loc;  //tx loc
+                                cells[6] = RX.power.ToString();   //power dBm
+                                cells[7] = RX.rx_sign;  //reporter
+                                cells[8] = RX.rx_loc;    //rx loc
+
+                                cells[9] = RX.distance.ToString();   //km
+                                int km = Convert.ToInt32(RX.distance);    //miles
+                                cells[10] = convert_to_miles(km);
+                                cells[11] = RX.azimuth.ToString();
+                                cells[12] = RX.version;   //version
+                                update_grid(); //add this row to the datagridview
+                            }
                             i++;
                         }
                         else
