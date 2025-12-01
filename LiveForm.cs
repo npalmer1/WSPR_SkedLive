@@ -260,8 +260,32 @@ namespace WSPR_Live
 
         }
 
+        private void clearRX()
+        {
+            RX.id = 0;
+            RX.time = DateTime.MinValue;
+            RX.band = 0;
+            RX.rx_sign = "";
+            RX.rx_lat = 0;
+            RX.rx_lon = 0;
+            RX.rx_loc = "";
+            RX.tx_sign = "";
+            RX.tx_lat = 0;
+            RX.tx_lon = 0;
+            RX.tx_loc = "";
+            RX.distance = 0;
+            RX.azimuth = 0;
+            RX.rx_azimuth = 0;
+            RX.frequency = 0;
+            RX.power = 0;
+            RX.snr = 0;
+            RX.drift = 0;
+            RX.version = "";
+            RX.code = 0;
+        }
         public async Task process_data(string data)
         {
+            clearRX();
             try
             {
                 string[] R = data.Split('\t');
@@ -548,13 +572,14 @@ namespace WSPR_Live
                         command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
                         MySqlDataReader Reader;
                         Reader = command.ExecuteReader();
-
+                      
                         while (Reader.Read())
                         {
                             found = true;
 
                             if (i < maxrows - 1 && i < tablecount - 1)    //only show first maxrows rows, or to length of reported table
                             {
+                                clearRX();
                                 RX.rx_sign = "";
                                 RX.time = (DateTime)Reader["time"];
                                 RX.band = (Int16)Reader["band"];
@@ -812,13 +837,15 @@ namespace WSPR_Live
                     MySqlDataReader Reader;
                     Reader = command.ExecuteReader();
                     
-                    clearcells();
+                   
                     while (Reader.Read())
                     {
                         found = true;
 
                         if (i < maxrows && i < tablecount)   //only show first maxrows rows, or to length of reported table
                         {
+                            clearRX();
+                            clearcells();
                             RX.rx_sign = "";
                             RX.time = (DateTime)Reader["time"];
                             RX.band = (Int16)Reader["band"];
