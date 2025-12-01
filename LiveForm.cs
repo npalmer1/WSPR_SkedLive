@@ -45,7 +45,7 @@ namespace WSPR_Live
 
 
         public string originalcall = "G4GCI";
-        private string[] cells = new string[20];
+        private string[] cells = new string[22];
         private string Callsign = "G4GCI";
         private bool databaseError = false;
 
@@ -159,11 +159,11 @@ namespace WSPR_Live
             public int azimuth;
             public int rx_azimuth;
             public int frequency;
-            public int power;
-            public int snr;
-            public int drift;
+            public Int16 power;
+            public Int16 snr;
+            public Int16 drift;
             public string version;
-            public int code;
+            public Int16 code;
         }
         RX_data RX = new RX_data();
 
@@ -265,26 +265,33 @@ namespace WSPR_Live
             try
             {
                 string[] R = data.Split('\t');
-                RX.id = Convert.ToInt64(R[0].Trim());
+                Int64.TryParse(R[0].Trim(), out RX.id);
+                
                 RX.time = Convert.ToDateTime(R[1]);
-                RX.band = Convert.ToInt16(R[2]);
+                
+                Int16.TryParse(R[2], out RX.band);
+                
                 RX.rx_sign = R[3];
-                RX.rx_lat = (float)Convert.ToDouble(R[4]);
-                RX.rx_lon = (float)Convert.ToDouble(R[5]);
+                
+                float.TryParse(R[4], out RX.rx_lat);
+                               
+                float.TryParse(R[5], out RX.rx_lon);
                 RX.rx_loc = R[6];
                 RX.tx_sign = R[7];
-                RX.tx_lat = (float)(Convert.ToDouble(R[8]));
-                RX.tx_lon = (float)(Convert.ToDouble(R[9]));
+                float.TryParse(R[8], out RX.tx_lat);
+                float.TryParse(R[9], out RX.tx_lon);
                 RX.tx_loc = R[10];
-                RX.distance = Convert.ToInt32(R[11]);
-                RX.azimuth = Convert.ToInt32(R[12]);
-                RX.rx_azimuth = Convert.ToInt32(R[13]);
-                RX.frequency = Convert.ToInt32(R[14]);
-                RX.power = Convert.ToInt16(R[15]);
-                RX.snr = Convert.ToInt16(R[16]);
-                RX.drift = Convert.ToInt16(R[17]);
+                Int32.TryParse(R[11], out RX.distance);
+                Int32.TryParse(R[12], out RX.azimuth);
+               Int32.TryParse(R[13], out RX.rx_azimuth);
+                Int32.TryParse(R[14], out RX.frequency);
+                Int16.TryParse(R[15], out RX.power);
+              
+                Int16.TryParse(R[16], out RX.snr);
+                Int16.TryParse(R[17], out RX.drift);
+              
                 RX.version = R[18];
-                RX.code = Convert.ToInt16(R[19]);
+                Int16.TryParse(R[19], out RX.code);
             }
             catch
             {
@@ -596,6 +603,7 @@ namespace WSPR_Live
 
         private void fill_cells()
         {
+            clearcells();
             try
             {
                 cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
@@ -716,7 +724,13 @@ namespace WSPR_Live
             return b;
         }
 
-
+        private void clearcells()
+        {
+            for (int i =0; i < cells.Length; i++)
+            {
+                cells[i] = "";
+            }
+        }
         private bool find_selected(string time1, string time2, int band, int tablecount) //find a slot row for display in grid from the database corresponding to the date/time from the slot
         {
             DataTable Slots = new DataTable();
@@ -798,7 +812,7 @@ namespace WSPR_Live
                     MySqlDataReader Reader;
                     Reader = command.ExecuteReader();
                     
-
+                    clearcells();
                     while (Reader.Read())
                     {
                         found = true;
