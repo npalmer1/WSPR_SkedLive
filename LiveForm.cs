@@ -846,48 +846,59 @@ namespace WSPR_Live
                         {
                             clearRX();
                             clearcells();
-                            RX.rx_sign = "";
-                            RX.time = (DateTime)Reader["time"];
-                            RX.band = (Int16)Reader["band"];
-                            RX.rx_sign = (string)Reader["rx_sign"];
-                            RX.rx_loc = (string)Reader["rx_loc"];
-                            RX.tx_sign = (string)Reader["tx_sign"];
-                            RX.tx_loc = (string)Reader["tx_loc"];
-                            RX.distance = (int)Reader["distance"];
-                            RX.azimuth = (int)Reader["azimuth"];
-                            RX.frequency = (int)Reader["frequency"];
-                            RX.power = (Int16)Reader["power"];
-                            RX.snr = (Int16)Reader["snr"];
-                            RX.drift = (Int16)Reader["drift"];
-                            RX.version = (string)Reader["version"];
+                            try
+                            {
+                                RX.rx_sign = "";
+                                RX.time = (DateTime)Reader["time"];
+                                RX.band = (Int16)Reader["band"];
+                                RX.rx_sign = (string)Reader["rx_sign"];
+                                RX.rx_loc = (string)Reader["rx_loc"];
+                                RX.tx_sign = (string)Reader["tx_sign"];
+                                RX.tx_loc = (string)Reader["tx_loc"];
+                                RX.distance = (int)Reader["distance"];
+                                RX.azimuth = (int)Reader["azimuth"];
+                                RX.frequency = (int)Reader["frequency"];
+                                RX.power = (Int16)Reader["power"];
+                                RX.snr = (Int16)Reader["snr"];
+                                RX.drift = (Int16)Reader["drift"];
+                                RX.version = (string)Reader["version"];
+                            }
+                            catch
+                            {
+                            }
 
                             if (RX.rx_sign != "" && RX.rx_sign != null)
                             {
-
-                                cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
-                                cells[1] = RX.tx_sign; //tx sign
-                                double f = Convert.ToDouble(RX.frequency);
-                                f = f / 1000000;
-                                string formattedF = f.ToString("F6");
-                                cells[2] = formattedF; //freq
-                                string snr = Convert.ToString(RX.snr);
-                                if (RX.snr > 0)
+                                try
                                 {
-                                    snr = "+" + snr;
-                                }
-                                cells[3] = snr;  //snr
-                                cells[4] = RX.drift.ToString();  //drift
-                                cells[5] = RX.tx_loc;  //tx loc
-                                cells[6] = RX.power.ToString();   //power dBm
-                                cells[7] = RX.rx_sign;  //reporter
-                                cells[8] = RX.rx_loc;    //rx loc
+                                    cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
+                                    cells[1] = RX.tx_sign; //tx sign
+                                    double f = Convert.ToDouble(RX.frequency);
+                                    f = f / 1000000;
+                                    string formattedF = f.ToString("F6");
+                                    cells[2] = formattedF; //freq
+                                    string snr = Convert.ToString(RX.snr);
+                                    if (RX.snr > 0)
+                                    {
+                                        snr = "+" + snr;
+                                    }
+                                    cells[3] = snr;  //snr
+                                    cells[4] = RX.drift.ToString();  //drift
+                                    cells[5] = RX.tx_loc;  //tx loc
+                                    cells[6] = RX.power.ToString();   //power dBm
+                                    cells[7] = RX.rx_sign;  //reporter
+                                    cells[8] = RX.rx_loc;    //rx loc
 
-                                cells[9] = RX.distance.ToString();   //km
-                                int km = Convert.ToInt32(RX.distance);    //miles
-                                cells[10] = convert_to_miles(km);
-                                cells[11] = RX.azimuth.ToString();
-                                cells[12] = RX.version;   //version
-                                update_grid(); //add this row to the datagridview
+                                    cells[9] = RX.distance.ToString();   //km
+                                    int km = Convert.ToInt32(RX.distance);    //miles
+                                    cells[10] = convert_to_miles(km);
+                                    cells[11] = RX.azimuth.ToString();
+                                    cells[12] = RX.version;   //version
+                                    update_grid(); //add this row to the datagridview
+                                }
+                                catch
+                                {
+                                }
                             }
                             i++;
                         }
@@ -1037,7 +1048,9 @@ namespace WSPR_Live
                 {
                     maxstr = convert_to_miles(maxDistance);
                 }
-                int maxD = Convert.ToInt32(maxstr);
+                int maxD = 2000;
+                Int32.TryParse(maxstr, out maxD);
+              
                 int t;
                 if (e.KeyChar == 45) //no minus allowed
                 {
@@ -1099,7 +1112,8 @@ namespace WSPR_Live
                 {
                     maxstr = convert_to_miles(maxDistance);
                 }
-                int maxD = Convert.ToInt32(maxstr);
+                int maxD = 2000;
+                Int32.TryParse(maxstr, out maxD);
                 int t;
                 if (e.KeyChar == 45) //no minus allowed
                 {
