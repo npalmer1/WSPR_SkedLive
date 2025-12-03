@@ -51,7 +51,7 @@ namespace WSPR_Live
 
         int timespan = 10; //timespan x minutes
         int liveLimit = 1000;
-        int maxrows = 1000;
+        int maxrows = 2500;
         bool update = false;
         string dateformat = "yyyy-MM-dd";
 
