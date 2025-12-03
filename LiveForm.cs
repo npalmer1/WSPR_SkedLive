@@ -51,7 +51,7 @@ namespace WSPR_Live
 
         int timespan = 10; //timespan x minutes
         int liveLimit = 1000;
-        int maxrows = 2500;
+        int maxrows = 1000;
         bool update = false;
         string dateformat = "yyyy-MM-dd";
 
@@ -405,11 +405,12 @@ namespace WSPR_Live
                 return;
             }
 
+            MessageForm nForm = new MessageForm();
+            Msg.TCMessageBox("Please wait - retrieving live data ....", "", 30000, nForm);
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
-                MessageForm nForm = new MessageForm();
-                Msg.TCMessageBox("Please wait - retrieving live data ....", "", 30000, nForm);
+              
                 try
                 {
 
@@ -481,16 +482,15 @@ namespace WSPR_Live
                 {
                     if (tries > 3)
                     {
-                        isUnlocked = true;
-                        nForm.Dispose();
-                        return;
+                        isUnlocked = true;                       
                     }
                     Thread.Sleep(800);
                     tries++;
 
                 }
-                nForm.Dispose();
+              
             }
+            nForm.Dispose();
 
         }
 

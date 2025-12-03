@@ -69,7 +69,9 @@ namespace WSPR_Live
                     }
                     else
                     {
+                        timer1.Stop();
                         timer1.Enabled = false;
+                        
                     }
                 }
                 else
@@ -86,7 +88,10 @@ namespace WSPR_Live
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            this.Dispose();
+            //this.Dispose();
+            timer1.Stop();
+            timer1.Enabled = false;
+            this.Hide();
         }
 
         private void OKbutton_Click(object sender, EventArgs e)
