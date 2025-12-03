@@ -406,7 +406,7 @@ namespace WSPR_Live
             }
 
             MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait - retrieving live data ....", "", 30000, nForm);
+            Msg.TCMessageBox("Please wait - retrieving data ....", "", 30000, nForm);
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
