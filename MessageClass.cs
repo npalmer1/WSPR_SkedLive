@@ -13,10 +13,12 @@ namespace WSPR_Live
     {
         public async void TCMessageBox(string text, string caption, int delay, MessageForm mForm)
         {
+            
             await Task.Run(() =>
             {
                 runTCMessageBox(text, caption, delay, mForm);
             });
+            
         }
         public async Task runTCMessageBox(string text, string caption, int delay, MessageForm mForm)
         {
@@ -26,9 +28,9 @@ namespace WSPR_Live
             mForm.message = text;
             mForm.delay = delay;
             mForm.StartPosition = FormStartPosition.CenterParent;
-            mForm.Show();
+            mForm.ShowDialog();
             mForm.BringToFront();
-           
+
         }
         public async void TMessageBox(string text, string caption, int delay)
         {

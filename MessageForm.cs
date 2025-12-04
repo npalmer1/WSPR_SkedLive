@@ -91,7 +91,8 @@ namespace WSPR_Live
             //this.Dispose();
             timer1.Stop();
             timer1.Enabled = false;
-            OKbutton_Click(sender, e);           
+            reply = true;
+            this.Hide();       
         }
 
         private void OKbutton_Click(object sender, EventArgs e)
