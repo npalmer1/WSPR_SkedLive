@@ -26,7 +26,7 @@ namespace WSPR_Live
             mForm.message = text;
             mForm.delay = delay;
             mForm.StartPosition = FormStartPosition.CenterParent;
-            mForm.ShowDialog();
+            mForm.Show();
             mForm.BringToFront();
            
         }
@@ -47,6 +47,7 @@ namespace WSPR_Live
             mForm.delay = delay;
             mForm.StartPosition = FormStartPosition.CenterParent;
             mForm.ShowDialog();
+            mForm.Dispose();
         }
 
         public void OKMessageBox(string text, string caption)
@@ -60,42 +61,26 @@ namespace WSPR_Live
             mForm.delay = 0;
             mForm.StartPosition = FormStartPosition.CenterParent;
             mForm.ShowDialog();
-            while (!mForm.reply)
-            {
-
-            }
+           
             mForm.Dispose();
         }
         public DialogResult ynMessageBox(string text, string caption)
         {
-            DialogResult res;
-            //maximum text length 55
+         
             MessageForm mForm = new MessageForm();
             mForm.Text = caption;
             mForm.yesno = true;
             mForm.message = text;
             mForm.delay = 0;
             mForm.StartPosition = FormStartPosition.CenterParent;
-            mForm.ShowDialog();
-            while (!mForm.reply)
-            {
-
-            }
-            if (mForm.YES)
-            {
-                res = DialogResult.Yes;
-            }
-            else
-            {
-                res = DialogResult.No;
-
-            }
+            var res = mForm.ShowDialog();          
+            
             mForm.Dispose();
             return res;
 
         }
 
-        public int editMessageBox(string text, string caption)
+       /* public int editMessageBox(string text, string caption)
         {
 
             //maximum text length 45
@@ -108,10 +93,7 @@ namespace WSPR_Live
             mForm.StartPosition = FormStartPosition.CenterParent;
             mForm.ShowDialog();
             int R = 0;
-            while (!mForm.reply)
-            {
-
-            }
+           
             if (mForm.button == 1)
             {
                 R = 1; //add
@@ -133,6 +115,26 @@ namespace WSPR_Live
             return R;
 
 
+        }*/
+
+        public int editMessageBox(string text, string caption)
+        {
+
+            //maximum text length 45
+            //MessageForm mForm = new MessageForm();
+           
+            using (var mForm = new MessageForm())
+            {
+                mForm.Text = caption;
+                mForm.yesno = false;
+                mForm.message = text;
+                mForm.delay = 0;
+                mForm.editbuttons = true;
+                mForm.StartPosition = FormStartPosition.CenterParent;
+
+                mForm.ShowDialog();
+                return mForm.button; // assuming button is already set to 1,2,3
+            }            
         }
 
         public async Task<bool> IsUrlReachable(string url)
