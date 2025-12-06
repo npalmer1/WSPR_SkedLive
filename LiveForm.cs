@@ -87,8 +87,8 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.6";
-            ver = 016;
+            vers = "0.1.7";
+            ver = 017;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -405,6 +405,14 @@ namespace WSPR_Live
                 return;
             }
 
+            if (stopUrl)
+            {                
+                return;
+            }
+            if (!await checkSQL())
+            {              
+                return;
+            }
             MessageForm nForm = new MessageForm();
             Msg.TCMessageBox("Please wait - retrieving data ....", "", 30000,nForm);
             while (!isUnlocked)
@@ -415,15 +423,6 @@ namespace WSPR_Live
                 {
 
                     int band = 0;
-
-                    if (stopUrl)
-                    {
-                        return;
-                    }
-                    if (!await checkSQL())
-                    {
-                        return;
-                    }
 
                     //note livelimit  is 1000 - max number of entries to extract from wspr.live database
                     using var client = new HttpClient();
@@ -1187,7 +1186,7 @@ namespace WSPR_Live
                 string freq = "";
                 if (!timer1.Enabled)
                 {
-
+                    
                     await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
 
@@ -1198,7 +1197,7 @@ namespace WSPR_Live
 
                     return;
                 }
-                if (wait)
+                if (wait && !timer1.Enabled)
                 {
                     timer1.Interval = 120000;
                     timer1.Enabled = true;
@@ -1280,17 +1279,20 @@ namespace WSPR_Live
         }
         private async void updatePassandCall()
         {
-
-            string freq = "";
-            startCount++;
-            if (startCount > startCountMax)  //X minutes
+            try
             {
-                startCount = 0;
-                get_results(Callsign, freq, db_server, db_user, db_pass, 10, owncall);
+                string freq = "";
+                startCount++;
+                if (startCount > startCountMax)  //X minutes
+                {
+                    startCount = 0;
+                    get_results(Callsign, freq, db_server, db_user, db_pass, 10, owncall);
 
+                }
+
+                await getUserandPassword();
             }
-
-            await getUserandPassword();
+            catch { }
 
         }
 

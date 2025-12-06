@@ -88,11 +88,19 @@ namespace WSPR_Live
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //this.Dispose();
-            timer1.Stop();
-            timer1.Enabled = false;
-            reply = true;
-            this.Hide();       
+            try
+            {
+                //this.Dispose();
+                reply = true;
+                this.Hide();
+                timer1.Stop();
+                timer1.Enabled = false;
+            }
+            catch
+            {
+                //ignore
+            }
+
         }
 
         private void OKbutton_Click(object sender, EventArgs e)
