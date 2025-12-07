@@ -347,7 +347,7 @@ namespace WSPR_Live
         private async void updateResults()
         {
             MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait - retrieving local data ....", "", 30000, nForm);
+            Msg.TCMessageBox("Please wait - retrieving local data ....", "", 50000, nForm);
             await show_results(db_server, db_user, db_pass);
             nForm.Dispose();
         }
@@ -414,7 +414,7 @@ namespace WSPR_Live
                 return;
             }
             MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait - retrieving data ....", "", 30000,nForm);
+            Msg.TCMessageBox("Please wait - retrieving data ....", "", 50000,nForm);
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
@@ -1275,7 +1275,14 @@ namespace WSPR_Live
 
         private void timer2_Tick(object sender, EventArgs e)
         {
-            updatePassandCall();
+            try
+            {
+                updatePassandCall();
+            }
+            catch
+            {
+                
+            }
         }
         private async void updatePassandCall()
         {

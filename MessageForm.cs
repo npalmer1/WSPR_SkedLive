@@ -90,17 +90,18 @@ namespace WSPR_Live
         {
             try
             {
-                //this.Dispose();
-                reply = true;
-                this.Hide();
-                timer1.Stop();
-                timer1.Enabled = false;
+                this.Invoke((MethodInvoker)delegate
+                {
+                    timer1.Stop();
+                    reply = true;
+                    this.Hide();
+                });
             }
-            catch
+            catch (Exception ex)
             {
-                //ignore
+                //MessageBox.Show(ex.ToString());
             }
-
+          
         }
 
         private void OKbutton_Click(object sender, EventArgs e)
