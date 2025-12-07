@@ -346,10 +346,10 @@ namespace WSPR_Live
         }
         private async void updateResults()
         {
-            MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait - retrieving local data ....", "", 50000, nForm);
+            //MessageForm nForm = new MessageForm();
+            Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
             await show_results(db_server, db_user, db_pass);
-            nForm.Dispose();
+            //nForm.Dispose();
         }
 
         public async Task<bool> SQL_Get()
@@ -413,8 +413,8 @@ namespace WSPR_Live
             {              
                 return;
             }
-            MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait - retrieving data ....", "", 50000,nForm);
+            //MessageForm nForm = new MessageForm();
+            Msg.TMessageBox("Please wait - retrieving data ....", "", 30000);
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
@@ -489,7 +489,7 @@ namespace WSPR_Live
                 }
               
             }
-            nForm.Dispose();
+            //nForm.Dispose();
 
         }
 
@@ -1004,8 +1004,8 @@ namespace WSPR_Live
 
         private void filterbutton_Click(object sender, EventArgs e)
         {
-            MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait ....", "", 30000, nForm);
+            //MessageForm nForm = new MessageForm();
+            Msg.TMessageBox("Please wait ....", "", 30000);
             if (filterbutton.Text == "Apply")
             {
                 filter_results(db_server, db_user, db_pass);
@@ -1016,17 +1016,17 @@ namespace WSPR_Live
                 show_results(db_server, db_user, db_pass);
                // filterbutton.Text = "Apply";
             }
-            nForm.Dispose();
+            //nForm.Dispose();
         }
 
         private void Clearbutton_Click(object sender, EventArgs e)
         {
-            MessageForm nForm = new MessageForm();
-            Msg.TCMessageBox("Please wait ....", "", 30000,nForm);
+            //MessageForm nForm = new MessageForm();
+            Msg.TMessageBox("Please wait ....", "", 30000);
 
             show_results(db_server, db_user, db_pass);
 
-            nForm.Dispose();
+            //nForm.Dispose();
         }
 
 
