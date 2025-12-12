@@ -65,7 +65,7 @@ namespace WSPR_Live
         string db_user = "admin";
         string db_pass = "wspr";
         string vers = "";
-        int ver = 015; //version 0.1.5
+        int ver = 016; //version 0.1.5
 
         string headerline = "";
 
@@ -87,8 +87,8 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.7";
-            ver = 017;
+            vers = "0.1.8";
+            ver = 018;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -414,11 +414,11 @@ namespace WSPR_Live
                 return;
             }
             //MessageForm nForm = new MessageForm();
-            Msg.TMessageBox("Please wait - retrieving data ....", "", 30000);
+           
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
-              
+                Msg.TMessageBox("Please wait - retrieving data ....", "", 30000);
                 try
                 {
 
