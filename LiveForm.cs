@@ -87,8 +87,8 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.8";
-            ver = 018;
+            vers = "0.1.9";
+            ver = 019;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -712,35 +712,41 @@ namespace WSPR_Live
                     b = 10;
                     break;
                 case 8:
-                    b = 14;
+                    b = 13;
                     break;
                 case 9:
-                    b = 18;
+                    b = 14;
                     break;
                 case 10:
-                    b = 21;
+                    b = 18;
                     break;
                 case 11:
-                    b = 24;
+                    b = 21;
                     break;
                 case 12:
-                    b = 28;
+                    b = 24;
                     break;
                 case 13:
-                    b = 50;
+                    b = 28;
                     break;
                 case 14:
-                    b = 70;
+                    b = 40;
                     break;
                 case 15:
-                    b = 144;
+                    b = 50;
                     break;
                 case 16:
-                    b = 432;
+                    b = 70;
                     break;
                 case 17:
-                    b = 1296;
+                    b = 144;
                     break;
+                case 18:
+                    b = 432;
+                    break;
+                case 19:
+                    b = 1296;
+                    break;               
                 default:
                     b = -2; //all
                     break;
@@ -1211,7 +1217,7 @@ namespace WSPR_Live
             }
         }
 
-        private int findPeriod()
+        private int findPeriod() //find period in minutes
         {
             try
             {
@@ -1239,7 +1245,7 @@ namespace WSPR_Live
                         break;
                     case 6:
                         i = 1440;
-                        break;
+                        break;                   
                     default:
                         i = 10;
                         break;
