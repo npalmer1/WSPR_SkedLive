@@ -31,6 +31,7 @@ namespace WSPR_Live
 
         private void MessageForm_Load(object sender, EventArgs e)
         {
+            this.BringToFront();
             if (editbuttons)
             {
                 OKbutton.Visible = false;

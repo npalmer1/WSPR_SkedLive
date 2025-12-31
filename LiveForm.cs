@@ -87,8 +87,8 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.9";
-            ver = 019;
+            vers = "0.1.10";
+            ver = 0110;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
