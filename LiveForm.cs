@@ -290,15 +290,15 @@ namespace WSPR_Live
             {
                 string[] R = data.Split('\t');
                 Int64.TryParse(R[0].Trim(), out RX.id);
-                
+
                 RX.time = Convert.ToDateTime(R[1]);
-                
+
                 Int16.TryParse(R[2], out RX.band);
-                
+
                 RX.rx_sign = R[3];
-                
+
                 float.TryParse(R[4], out RX.rx_lat);
-                               
+
                 float.TryParse(R[5], out RX.rx_lon);
                 RX.rx_loc = R[6];
                 RX.tx_sign = R[7];
@@ -307,13 +307,13 @@ namespace WSPR_Live
                 RX.tx_loc = R[10];
                 Int32.TryParse(R[11], out RX.distance);
                 Int32.TryParse(R[12], out RX.azimuth);
-               Int32.TryParse(R[13], out RX.rx_azimuth);
+                Int32.TryParse(R[13], out RX.rx_azimuth);
                 Int32.TryParse(R[14], out RX.frequency);
                 Int16.TryParse(R[15], out RX.power);
-              
+
                 Int16.TryParse(R[16], out RX.snr);
                 Int16.TryParse(R[17], out RX.drift);
-              
+
                 RX.version = R[18];
                 Int16.TryParse(R[19], out RX.code);
             }
@@ -406,15 +406,15 @@ namespace WSPR_Live
             }
 
             if (stopUrl)
-            {                
+            {
                 return;
             }
             if (!await checkSQL())
-            {              
+            {
                 return;
             }
             //MessageForm nForm = new MessageForm();
-           
+
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
@@ -442,7 +442,7 @@ namespace WSPR_Live
                         dataGridView1.Rows.Clear();
                         dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
                     }
-                    while ((line = reader.ReadLine()) != null  || !reader.EndOfStream)
+                    while ((line = reader.ReadLine()) != null || !reader.EndOfStream)
                     {
                         if (line != null && line != "")
                         {
@@ -466,9 +466,9 @@ namespace WSPR_Live
 
                     await Task.Delay(1000);
 
-                    if (owncall) 
-                    { 
-                        await show_results(server, db_user, db_pass); 
+                    if (owncall)
+                    {
+                        await show_results(server, db_user, db_pass);
                     }
                     else
                     {
@@ -481,13 +481,13 @@ namespace WSPR_Live
                 {
                     if (tries > 3)
                     {
-                        isUnlocked = true;                       
+                        isUnlocked = true;
                     }
                     Thread.Sleep(800);
                     tries++;
 
                 }
-              
+
             }
             //nForm.Dispose();
 
@@ -571,7 +571,7 @@ namespace WSPR_Live
                         command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
                         MySqlDataReader Reader;
                         Reader = command.ExecuteReader();
-                      
+
                         while (Reader.Read())
                         {
                             found = true;
@@ -746,7 +746,7 @@ namespace WSPR_Live
                     break;
                 case 19:
                     b = 1296;
-                    break;               
+                    break;
                 default:
                     b = -2; //all
                     break;
@@ -756,7 +756,7 @@ namespace WSPR_Live
 
         private void clearcells()
         {
-            for (int i =0; i < cells.Length; i++)
+            for (int i = 0; i < cells.Length; i++)
             {
                 cells[i] = "";
             }
@@ -841,8 +841,8 @@ namespace WSPR_Live
 
                     MySqlDataReader Reader;
                     Reader = command.ExecuteReader();
-                    
-                   
+
+
                     while (Reader.Read())
                     {
                         found = true;
@@ -1020,7 +1020,7 @@ namespace WSPR_Live
             else
             {
                 show_results(db_server, db_user, db_pass);
-               // filterbutton.Text = "Apply";
+                // filterbutton.Text = "Apply";
             }
             //nForm.Dispose();
         }
@@ -1055,7 +1055,7 @@ namespace WSPR_Live
                 }
                 int maxD = 2000;
                 Int32.TryParse(maxstr, out maxD);
-              
+
                 int t;
                 if (e.KeyChar == 45) //no minus allowed
                 {
@@ -1192,7 +1192,7 @@ namespace WSPR_Live
                 string freq = "";
                 if (!timer1.Enabled)
                 {
-                    
+
                     await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
 
@@ -1245,7 +1245,7 @@ namespace WSPR_Live
                         break;
                     case 6:
                         i = 1440;
-                        break;                   
+                        break;
                     default:
                         i = 10;
                         break;
@@ -1276,7 +1276,7 @@ namespace WSPR_Live
             if (PlistBox.SelectedIndex > -1)
             {
                 Plabel.Text = PlistBox.SelectedItem.ToString();
-            }            
+            }
         }
 
         private void timer2_Tick(object sender, EventArgs e)
@@ -1287,7 +1287,7 @@ namespace WSPR_Live
             }
             catch
             {
-                
+
             }
         }
         private async void updatePassandCall()
@@ -1340,7 +1340,7 @@ namespace WSPR_Live
                 {
                     Callsign = calltextBox.Text.ToUpper();
                     this.Text = headerline.Replace(originalcall, Callsign);
-                }              
+                }
             }
             else
             {
@@ -1371,6 +1371,16 @@ namespace WSPR_Live
             }
         }
 
-      
+        private void updatecheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (updatecheckBox.Checked)
+            {
+                disabledlabel.Visible = true;
+            }
+            else
+            {
+                disabledlabel.Visible = false;
+            }
+        }
     }
 }

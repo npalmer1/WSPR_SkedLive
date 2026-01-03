@@ -74,6 +74,7 @@
             othercheckBox = new CheckBox();
             label9 = new Label();
             Clearbutton = new Button();
+            disabledlabel = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -430,6 +431,7 @@
             updatecheckBox.TabIndex = 30;
             updatecheckBox.Text = "Disable updates (avoid interupting a search)";
             updatecheckBox.UseVisualStyleBackColor = true;
+            updatecheckBox.CheckedChanged += updatecheckBox_CheckedChanged;
             // 
             // calltextBox
             // 
@@ -472,12 +474,26 @@
             Clearbutton.UseVisualStyleBackColor = true;
             Clearbutton.Click += Clearbutton_Click;
             // 
+            // disabledlabel
+            // 
+            disabledlabel.AutoSize = true;
+            disabledlabel.BackColor = Color.Tomato;
+            disabledlabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            disabledlabel.ForeColor = Color.Yellow;
+            disabledlabel.Location = new Point(457, 7);
+            disabledlabel.Name = "disabledlabel";
+            disabledlabel.Size = new Size(101, 15);
+            disabledlabel.TabIndex = 36;
+            disabledlabel.Text = "Updates disabled";
+            disabledlabel.Visible = false;
+            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(1038, 604);
+            Controls.Add(disabledlabel);
             Controls.Add(Clearbutton);
             Controls.Add(label9);
             Controls.Add(othercheckBox);
@@ -563,5 +579,6 @@
         private CheckBox othercheckBox;
         private Label label9;
         private Button Clearbutton;
+        private Label disabledlabel;
     }
 }
