@@ -281,6 +281,7 @@
             dataGridView1.ReadOnly = true;
             dataGridView1.Size = new Size(1005, 476);
             dataGridView1.TabIndex = 3;
+            dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
             // Column1
             // 

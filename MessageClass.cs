@@ -67,58 +67,73 @@ namespace WSPR_Live
            
             mForm.Dispose();
         }
+        
+
         public DialogResult ynMessageBox(string text, string caption)
         {
-         
+            DialogResult res;
+            //maximum text length 55
             MessageForm mForm = new MessageForm();
             mForm.Text = caption;
             mForm.yesno = true;
             mForm.message = text;
             mForm.delay = 0;
             mForm.StartPosition = FormStartPosition.CenterParent;
-            var res = mForm.ShowDialog();          
-            
+            mForm.ShowDialog();
+            while (!mForm.reply)
+            {
+
+            }
+            if (mForm.YES)
+            {
+                res = DialogResult.Yes;
+            }
+            else
+            {
+                res = DialogResult.No;
+
+            }
             mForm.Dispose();
             return res;
 
         }
 
-       /* public int editMessageBox(string text, string caption)
-        {
+        /* public int editMessageBox(string text, string caption)
+         {
 
-            //maximum text length 45
-            MessageForm mForm = new MessageForm();
-            mForm.Text = caption;
-            mForm.yesno = false;
-            mForm.message = text;
-            mForm.delay = 0;
-            mForm.editbuttons = true;
-            mForm.StartPosition = FormStartPosition.CenterParent;
-            mForm.ShowDialog();
-            int R = 0;
-           
-            if (mForm.button == 1)
-            {
-                R = 1; //add
-            }
-            else if (mForm.button == 2)
-            {
-                R = 2; //edit
+             //maximum text length 45
+             MessageForm mForm = new MessageForm();
+             mForm.Text = caption;
+             mForm.yesno = false;
+             mForm.message = text;
+             mForm.delay = 0;
+             mForm.editbuttons = true;
+             mForm.StartPosition = FormStartPosition.CenterParent;
+             mForm.ShowDialog();
+             int R = 0;
 
-            }
-            else if (mForm.button == 3)
-            {
-                R = 3; //delete
-            }
-            else
-            {
-                R = 0;
-            }
-            mForm.Dispose();
-            return R;
+             if (mForm.button == 1)
+             {
+                 R = 1; //add
+             }
+             else if (mForm.button == 2)
+             {
+                 R = 2; //edit
+
+             }
+             else if (mForm.button == 3)
+             {
+                 R = 3; //delete
+             }
+             else
+             {
+                 R = 0;
+             }
+             mForm.Dispose();
+             return R;
 
 
-        }*/
+         }*/
 
         public int editMessageBox(string text, string caption)
         {

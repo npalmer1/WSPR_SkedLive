@@ -87,8 +87,8 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.10";
-            ver = 0110;
+            vers = "0.1.11";
+            ver = 0111;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -503,7 +503,7 @@ namespace WSPR_Live
                 dataGridView1.Rows.Clear();
                 dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
 
-                int rows = table_count(server, user, pass);
+                int rows = table_count();
                 if (rows > 0)
                 {
                     await find_received(rows);
@@ -518,10 +518,10 @@ namespace WSPR_Live
 
         }
 
-        private int table_count(string server, string user, string pass)
+        private int table_count()
         {
             int count = 0;
-            string connectionString = "server=" + server + ";user id=" + user + ";password=" + pass + ";database=wspr_rx";
+            string connectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
             var connection = new MySqlConnection(connectionString);
             try
             {
@@ -662,7 +662,7 @@ namespace WSPR_Live
         }
 
 
-        private void filter_results(string server, string user, string pass)
+        private void filter_results(bool version, string ver)
         {
             dataGridView1.Rows.Clear();
             dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
@@ -671,16 +671,18 @@ namespace WSPR_Live
             //dt = dt.AddHours(-2);
             string from = dt1.ToString("yyyy-MM-dd HH:mm:00");
             string to = dt2.ToString("yyyy-MM-dd HH:mm:00");
-            int rows = table_count(server, user, pass);
+            int rows = table_count();
             int band = get_band(bandlistBox.SelectedIndex);
             if (rows > 0)
             {
-                find_selected(from, to, band, rows);
+                find_selected(from, to, band, rows, version ,ver);
 
             }
 
             dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
         }
+
+     
 
         private int get_band(int bandno)
         {
@@ -761,7 +763,7 @@ namespace WSPR_Live
                 cells[i] = "";
             }
         }
-        private bool find_selected(string time1, string time2, int band, int tablecount) //find a slot row for display in grid from the database corresponding to the date/time from the slot
+        private bool find_selected(string time1, string time2, int band, int tablecount, bool version, string ver) //find a slot row for display in grid from the database corresponding to the date/time from the slot
         {
             DataTable Slots = new DataTable();
             //DateTime d = new DateTime();
@@ -828,8 +830,12 @@ namespace WSPR_Live
                         tostr = " AND distance <= " + tostr + " ";
                     }
                     //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
-                    if (datecheckBox.Checked)
+                    if (version)
                     {
+                        command.CommandText = "SELECT * FROM reported WHERE version = '" + ver+"'";
+                    }
+                    else if  (datecheckBox.Checked)
+                    { 
                         command.CommandText = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
                     }
                     else
@@ -1014,7 +1020,7 @@ namespace WSPR_Live
             Msg.TMessageBox("Please wait ....", "", 30000);
             if (filterbutton.Text == "Apply")
             {
-                filter_results(db_server, db_user, db_pass);
+                filter_results(false, "");
                 //filterbutton.Text = "Clear";
             }
             else
@@ -1381,6 +1387,30 @@ namespace WSPR_Live
             {
                 disabledlabel.Visible = false;
             }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0) 
+            { 
+                int rowIndex = e.RowIndex;
+                if (e.ColumnIndex >= 0)
+                {
+                    int colIndex = e.ColumnIndex;
+                    string text = dataGridView1.Rows[rowIndex].Cells[colIndex].Value?.ToString();
+                    if (colIndex == 12) //version column
+                    { 
+                        var res = Msg.ynMessageBox("Search by version (Y/N)?", "Version");
+                        if (res == DialogResult.Yes)
+                        {
+                            Msg.TMessageBox("Please wait ....", "", 30000);
+                            filter_results(true, text.Trim());
+                            
+                        }
+                    }
+                }
+            }
+            
         }
     }
 }
