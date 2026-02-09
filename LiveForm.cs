@@ -119,8 +119,9 @@ namespace WSPR_Live
             getUserandPassword();
             set_header(Callsign, db_server, db_user, db_pass);
             await Task.Delay(2000);
-            int min = 10;
-            await updateNow(min, false);
+            int min = 30;
+            await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
+           
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
         {
@@ -348,7 +349,7 @@ namespace WSPR_Live
         {
             //MessageForm nForm = new MessageForm();
             Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
-            await show_results(db_server, db_user, db_pass);
+            await show_results();
             //nForm.Dispose();
         }
 
@@ -398,6 +399,7 @@ namespace WSPR_Live
             //note: band not currently used
 
             bool isUnlocked = false;
+            bool found = false;
             int tries = 0;
             if (updatecheckBox.Checked)
             {
@@ -446,6 +448,7 @@ namespace WSPR_Live
                     {
                         if (line != null && line != "")
                         {
+                            found = true;
                             await process_data(line);
 
                             if (owncall)
@@ -465,14 +468,16 @@ namespace WSPR_Live
 
 
                     await Task.Delay(1000);
-
+                    if (found)
+                    { 
                     if (owncall)
                     {
-                        await show_results(server, db_user, db_pass);
+                        await show_results();
                     }
                     else
                     {
                         dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                    }
                     }
 
 
@@ -496,20 +501,19 @@ namespace WSPR_Live
 
 
 
-        private async Task show_results(string server, string user, string pass) // read back from the reported table to populate the datagridview
+        private async Task show_results() // read back from the reported table to populate the datagridview
         {
             try
             {
-                dataGridView1.Rows.Clear();
-                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
+               
 
                 int rows = table_count();
                 if (rows > 0)
                 {
                     await find_received(rows);
-
+                    dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date                    
                 }
-                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+               
             }
             catch
             {
@@ -546,7 +550,7 @@ namespace WSPR_Live
             }
         }
 
-        private async Task<bool> find_received(int tablecount) //find a slot row for display in grid from the database corresponding to the date/time from the slot
+        private async Task<bool> find_received(int tablecount) //find a slot row for display in grid from the database corresponding to the date/time from the slot        
         {
             DataTable Slots = new DataTable();
             //DateTime d = new DateTime();
@@ -574,6 +578,11 @@ namespace WSPR_Live
 
                         while (Reader.Read())
                         {
+                            if (!found)
+                            {
+                                dataGridView1.Rows.Clear();
+                                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
+                            }
                             found = true;
 
                             if (i < maxrows - 1 && i < tablecount - 1)    //only show first maxrows rows, or to length of reported table
@@ -627,7 +636,7 @@ namespace WSPR_Live
 
         private void fill_cells()
         {
-            clearcells();
+            //clearcells();
             try
             {
                 cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
@@ -1025,7 +1034,7 @@ namespace WSPR_Live
             }
             else
             {
-                show_results(db_server, db_user, db_pass);
+                show_results();
                 // filterbutton.Text = "Apply";
             }
             //nForm.Dispose();
@@ -1036,7 +1045,7 @@ namespace WSPR_Live
             //MessageForm nForm = new MessageForm();
             Msg.TMessageBox("Please wait ....", "", 30000);
 
-            show_results(db_server, db_user, db_pass);
+            show_results();
 
             //nForm.Dispose();
         }
