@@ -439,15 +439,18 @@ namespace WSPR_Live
 
                     string line = "";
 
-                    if (!owncall)
-                    {
-                        dataGridView1.Rows.Clear();
-                        dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
-                    }
+                   
                     while ((line = reader.ReadLine()) != null || !reader.EndOfStream)
                     {
                         if (line != null && line != "")
-                        {
+                        { if (!found)
+                            {
+                                if (!owncall)
+                                {
+                                    dataGridView1.Rows.Clear();
+                                    dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
+                                }
+                            }
                             found = true;
                             await process_data(line);
 
@@ -468,18 +471,15 @@ namespace WSPR_Live
 
 
                     await Task.Delay(1000);
-                    if (found)
-                    { 
-                    if (owncall)
-                    {
-                        await show_results();
-                    }
-                    else
-                    {
-                        dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
-                    }
-                    }
-
+                   
+                        if (owncall)
+                        {
+                            await show_results();
+                        }
+                        else
+                        {
+                            dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                        }                    
 
                 }
                 catch
@@ -578,15 +578,16 @@ namespace WSPR_Live
 
                         while (Reader.Read())
                         {
-                            if (!found)
-                            {
-                                dataGridView1.Rows.Clear();
-                                dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
-                            }
-                            found = true;
+                           
 
                             if (i < maxrows - 1 && i < tablecount - 1)    //only show first maxrows rows, or to length of reported table
                             {
+                                if (!found)
+                                {
+                                    dataGridView1.Rows.Clear();
+                                    dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);
+                                }
+                                found = true;
                                 clearRX();
                                 RX.rx_sign = "";
                                 RX.time = (DateTime)Reader["time"];
