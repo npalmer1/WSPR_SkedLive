@@ -392,12 +392,13 @@
             // PlistBox
             // 
             PlistBox.FormattingEnabled = true;
-            PlistBox.Items.AddRange(new object[] { "10 min", "30 min", "1 hour", "3 hours", "6 hours", "12 hours", "24 hours" });
+            PlistBox.Items.AddRange(new object[] { "10 min", "20 min", "30 min", "1 hour", "3 hours", "6 hours", "12 hours", "24 hours" });
             PlistBox.Location = new Point(137, 573);
             PlistBox.Name = "PlistBox";
             PlistBox.Size = new Size(91, 19);
             PlistBox.TabIndex = 27;
             PlistBox.SelectedIndexChanged += PlistBox_SelectedIndexChanged;
+          
             // 
             // label8
             // 

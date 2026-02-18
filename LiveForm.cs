@@ -65,7 +65,7 @@ namespace WSPR_Live
         string db_user = "admin";
         string db_pass = "wspr";
         string vers = "";
-        int ver = 016; //version 0.1.5
+
 
         string headerline = "";
 
@@ -87,8 +87,12 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.11";
-            ver = 0111;
+            vers = "0.1.12";
+
+
+            int index = PlistBox.TopIndex;
+            string text = PlistBox.Items[index].ToString();
+            PlistBox.SelectedIndex = index;
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -121,7 +125,8 @@ namespace WSPR_Live
             await Task.Delay(2000);
             int min = 30;
             await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
-           
+
+
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
         {
@@ -439,11 +444,12 @@ namespace WSPR_Live
 
                     string line = "";
 
-                   
+
                     while ((line = reader.ReadLine()) != null || !reader.EndOfStream)
                     {
                         if (line != null && line != "")
-                        { if (!found)
+                        {
+                            if (!found)
                             {
                                 if (!owncall)
                                 {
@@ -471,15 +477,15 @@ namespace WSPR_Live
 
 
                     await Task.Delay(1000);
-                   
-                        if (owncall)
-                        {
-                            await show_results();
-                        }
-                        else
-                        {
-                            dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
-                        }                    
+
+                    if (owncall)
+                    {
+                        await show_results();
+                    }
+                    else
+                    {
+                        dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                    }
 
                 }
                 catch
@@ -505,7 +511,7 @@ namespace WSPR_Live
         {
             try
             {
-               
+
 
                 int rows = table_count();
                 if (rows > 0)
@@ -513,7 +519,7 @@ namespace WSPR_Live
                     await find_received(rows);
                     dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date                    
                 }
-               
+
             }
             catch
             {
@@ -579,7 +585,7 @@ namespace WSPR_Live
 
                         while (Reader.Read())
                         {
-                           
+
 
                             if (i < maxrows - 1 && i < tablecount - 1)    //only show first maxrows rows, or to length of reported table
                             {
@@ -686,14 +692,14 @@ namespace WSPR_Live
             int band = get_band(bandlistBox.SelectedIndex);
             if (rows > 0)
             {
-                find_selected(from, to, band, rows, version ,ver);
+                find_selected(from, to, band, rows, version, ver);
 
             }
 
             dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
         }
 
-     
+
 
         private int get_band(int bandno)
         {
@@ -843,10 +849,10 @@ namespace WSPR_Live
                     //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
                     if (version)
                     {
-                        command.CommandText = "SELECT * FROM reported WHERE version = '" + ver+"'";
+                        command.CommandText = "SELECT * FROM reported WHERE version = '" + ver + "'";
                     }
-                    else if  (datecheckBox.Checked)
-                    { 
+                    else if (datecheckBox.Checked)
+                    {
                         command.CommandText = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
                     }
                     else
@@ -1179,6 +1185,10 @@ namespace WSPR_Live
         private async void Nowbutton_Click(object sender, EventArgs e)
         {
             int min = 30;
+            int index = PlistBox.TopIndex;
+            string text = PlistBox.Items[index].ToString();
+           
+                min = findPeriod();            
             updateNow(min, true);
         }
         private async Task updateNow(int min, bool wait)
@@ -1190,10 +1200,7 @@ namespace WSPR_Live
             }
             try
             {
-                if (PlistBox.SelectedIndex > -1)
-                {
-                    min = findPeriod();
-                }
+
                 string url = "http://db1.wspr.live";
                 if (stopUrl)
                 {
@@ -1237,37 +1244,49 @@ namespace WSPR_Live
         private int findPeriod() //find period in minutes
         {
             try
-            {
-                int p = PlistBox.SelectedIndex;
-                int i = 10;
-                switch (p)
-                {
-                    case 0:
-                        p = 10;
-                        break;
-                    case 1:
-                        i = 30;
-                        break;
-                    case 2:
-                        i = 60;
-                        break;
-                    case 3:
-                        i = 180;
-                        break;
-                    case 4:
-                        i = 360;
-                        break;
-                    case 5:
-                        i = 720;
-                        break;
-                    case 6:
-                        i = 1440;
-                        break;
-                    default:
-                        i = 10;
-                        break;
+            {              
+                int index = PlistBox.TopIndex;
+                string s = PlistBox.Items[index].ToString();
+                if (s != "" && s != null)
+                {                 
+
+                    int i = 10;
+                    switch (index)
+                    {
+                        case 0:
+                            i = 10;
+                            break;
+                        case 1:
+                            i = 20;
+                            break;
+                        case 2:
+                            i = 30;
+                            break;
+                        case 3:
+                            i = 60;
+                            break;
+                        case 4:
+                            i = 180;
+                            break;
+                        case 5:
+                            i = 360;
+                            break;
+                        case 6:
+                            i = 720;
+                            break;
+                        case 7:
+                            i = 1440;
+                            break;
+                        default:
+                            i = 10;
+                            break;
+                    }
+                    return i;
                 }
-                return i;
+                else
+                {
+                    return 10;
+                }
             }
             catch
             {
@@ -1313,10 +1332,17 @@ namespace WSPR_Live
             {
                 string freq = "";
                 startCount++;
+                startCountMax = 4;
+                int min = 20;
+                int index = PlistBox.TopIndex;
+                string text = PlistBox.Items[index].ToString();
+              
+                    min = findPeriod();
+                
                 if (startCount > startCountMax)  //X minutes
                 {
                     startCount = 0;
-                    get_results(Callsign, freq, db_server, db_user, db_pass, 10, owncall);
+                    get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
                 }
 
@@ -1402,26 +1428,27 @@ namespace WSPR_Live
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0) 
-            { 
+            if (e.RowIndex >= 0)
+            {
                 int rowIndex = e.RowIndex;
                 if (e.ColumnIndex >= 0)
                 {
                     int colIndex = e.ColumnIndex;
                     string text = dataGridView1.Rows[rowIndex].Cells[colIndex].Value?.ToString();
                     if (colIndex == 12) //version column
-                    { 
+                    {
                         var res = Msg.ynMessageBox("Search by version (Y/N)?", "Version");
                         if (res == DialogResult.Yes)
                         {
                             Msg.TMessageBox("Please wait ....", "", 30000);
                             filter_results(true, text.Trim());
-                            
+
                         }
                     }
                 }
             }
-            
+
         }
+
     }
 }
