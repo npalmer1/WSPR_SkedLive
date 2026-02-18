@@ -569,23 +569,23 @@ namespace WSPR_Live
             MySqlConnection connection = new MySqlConnection(myConnectionString);
             if (!databaseError)
             {
-               
+
+
+                MySqlCommand command = connection.CreateCommand();
+                connection.Open();
+
+
+
+                //SELECT* FROM your_table ORDER BY your_date_column DESC LIMIT 500;
+
+                command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
+                MySqlDataReader Reader;
+
+                command.CommandTimeout = 60; // seconds
+                Reader = command.ExecuteReader();
+                Monitor.Enter(_lock);
+                {
                     try
-                    {
-
-                        MySqlCommand command = connection.CreateCommand();
-                        connection.Open();
-
-                        
-
-                        //SELECT* FROM your_table ORDER BY your_date_column DESC LIMIT 500;
-
-                        command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
-                        MySqlDataReader Reader;
-
-                        command.CommandTimeout = 60; // seconds
-                        Reader = command.ExecuteReader();
-                    lock (_lock)
                     {
                         while (Reader.Read())
                         {
@@ -630,10 +630,11 @@ namespace WSPR_Live
                         Reader.Close();
                         connection.Close();
                         databaseError = false;
-                    } //unlock
+
+                    }
 
 
-                }
+
                     catch
                     {
 
@@ -642,7 +643,13 @@ namespace WSPR_Live
                         connection.Close();
 
                     }
-               
+                    finally
+                    {
+                        Monitor.Exit(_lock); // always releases the lock }
+
+                    }
+                }
+                
             }
             return found;
         }
@@ -810,68 +817,75 @@ namespace WSPR_Live
             string tostr = "";
             if (!databaseError)
             {
-               
-                    MySqlConnection connection = new MySqlConnection(myConnectionString);
-                    try
+
+                MySqlConnection connection = new MySqlConnection(myConnectionString);
+
+
+                connection.Open();
+
+                MySqlCommand command = connection.CreateCommand();
+
+                try
+                {
+                    if (callFiltertextBox.Text.Trim() != "")
                     {
-
-
-                        connection.Open();
-
-                        MySqlCommand command = connection.CreateCommand();
-
-                        if (callFiltertextBox.Text.Trim() != "")
+                        if (callFiltertextBox.Text.Contains("*"))
                         {
-                            if (callFiltertextBox.Text.Contains("*"))
-                            {
-                                callFiltertextBox.Text = callFiltertextBox.Text.Replace("*", "");
-                            }
-                            callstr = " AND rx_sign LIKE '" + callFiltertextBox.Text.Trim() + "%' ";
+                            callFiltertextBox.Text = callFiltertextBox.Text.Replace("*", "");
                         }
-                        fromstr = DFromtextBox.Text.Trim();
-                        tostr = DTotextBox.Text.Trim();
-                        if (fromstr != "")
+                        callstr = " AND rx_sign LIKE '" + callFiltertextBox.Text.Trim() + "%' ";
+                    }
+                    fromstr = DFromtextBox.Text.Trim();
+                    tostr = DTotextBox.Text.Trim();
+                    if (fromstr != "")
+                    {
+                        if (!kmcheckBox.Checked)
                         {
-                            if (!kmcheckBox.Checked)
-                            {
-                                Double k = Convert.ToInt32(fromstr);
-                                k = k * 1.609;
-                                int K = (int)k;
-                                fromstr = K.ToString();
-                            }
-                            fromstr = " AND distance >= " + fromstr + " ";
+                            Double k = Convert.ToInt32(fromstr);
+                            k = k * 1.609;
+                            int K = (int)k;
+                            fromstr = K.ToString();
                         }
-                        if (tostr != "")
+                        fromstr = " AND distance >= " + fromstr + " ";
+                    }
+                    if (tostr != "")
+                    {
+                        if (!kmcheckBox.Checked)
                         {
-                            if (!kmcheckBox.Checked)
-                            {
-                                Double k = Convert.ToInt32(tostr);
-                                k = k * 1.609;
-                                int K = (int)k;
-                                tostr = K.ToString();
-                            }
-                            tostr = " AND distance <= " + tostr + " ";
+                            Double k = Convert.ToInt32(tostr);
+                            k = k * 1.609;
+                            int K = (int)k;
+                            tostr = K.ToString();
                         }
-                        //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
-                        if (version)
-                        {
-                            command.CommandText = "SELECT * FROM reported WHERE version = '" + ver + "'";
-                        }
-                        else if (datecheckBox.Checked)
-                        {
-                            command.CommandText = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
-                        }
-                        else
-                        {
-                            command.CommandText = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
-                        }
+                        tostr = " AND distance <= " + tostr + " ";
+                    }
+                    //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
+                    if (version)
+                    {
+                        command.CommandText = "SELECT * FROM reported WHERE version = '" + ver + "'";
+                    }
+                    else if (datecheckBox.Checked)
+                    {
+                        command.CommandText = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+                    }
+                    else
+                    {
+                        command.CommandText = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+                    }
+                }
+                catch
+                {
+
+                }
 
 
 
-                        MySqlDataReader Reader;
-                        Reader = command.ExecuteReader();
+                MySqlDataReader Reader;
+                Reader = command.ExecuteReader();
 
-                    lock (_lock)
+                Monitor.Enter(_lock);
+                {
+                    try
                     {
                         while (Reader.Read())
                         {
@@ -946,7 +960,7 @@ namespace WSPR_Live
                         Reader.Close();
                         connection.Close();
                         databaseError = false;
-                    }
+
 
                     }
                     catch
@@ -957,7 +971,12 @@ namespace WSPR_Live
                         connection.Close();
 
                     }
-                
+                    finally
+                    {
+                        Monitor.Exit(_lock); // always releases the lock }
+
+                    }
+                }
             }
             return found;
         }
