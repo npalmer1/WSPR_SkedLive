@@ -418,6 +418,7 @@ namespace WSPR_Live
             }
             if (!await checkSQL())
             {
+                Msg.TMessageBox("Error - unable to connect to wspr.live", "Connection error", 2000);
                 return;
             }
             //MessageForm nForm = new MessageForm();
@@ -563,26 +564,29 @@ namespace WSPR_Live
             //DateTime d = new DateTime();
             int i = 0;
             bool found = false;
+            
             string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
             MySqlConnection connection = new MySqlConnection(myConnectionString);
             if (!databaseError)
             {
-                lock (_lock)
-                {
+               
                     try
                     {
 
-
+                        MySqlCommand command = connection.CreateCommand();
                         connection.Open();
 
-                        MySqlCommand command = connection.CreateCommand();
+                        
 
                         //SELECT* FROM your_table ORDER BY your_date_column DESC LIMIT 500;
 
                         command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
                         MySqlDataReader Reader;
-                        Reader = command.ExecuteReader();
 
+                        command.CommandTimeout = 60; // seconds
+                        Reader = command.ExecuteReader();
+                    lock (_lock)
+                    {
                         while (Reader.Read())
                         {
 
@@ -626,9 +630,10 @@ namespace WSPR_Live
                         Reader.Close();
                         connection.Close();
                         databaseError = false;
+                    } //unlock
 
 
-                    }
+                }
                     catch
                     {
 
@@ -637,7 +642,7 @@ namespace WSPR_Live
                         connection.Close();
 
                     }
-                }
+               
             }
             return found;
         }
@@ -805,150 +810,154 @@ namespace WSPR_Live
             string tostr = "";
             if (!databaseError)
             {
-                MySqlConnection connection = new MySqlConnection(myConnectionString);
-                try
-                {
-
-
-                    connection.Open();
-
-                    MySqlCommand command = connection.CreateCommand();
-
-                    if (callFiltertextBox.Text.Trim() != "")
+               
+                    MySqlConnection connection = new MySqlConnection(myConnectionString);
+                    try
                     {
-                        if (callFiltertextBox.Text.Contains("*"))
+
+
+                        connection.Open();
+
+                        MySqlCommand command = connection.CreateCommand();
+
+                        if (callFiltertextBox.Text.Trim() != "")
                         {
-                            callFiltertextBox.Text = callFiltertextBox.Text.Replace("*", "");
-                        }
-                        callstr = " AND rx_sign LIKE '" + callFiltertextBox.Text.Trim() + "%' ";
-                    }
-                    fromstr = DFromtextBox.Text.Trim();
-                    tostr = DTotextBox.Text.Trim();
-                    if (fromstr != "")
-                    {
-                        if (!kmcheckBox.Checked)
-                        {
-                            Double k = Convert.ToInt32(fromstr);
-                            k = k * 1.609;
-                            int K = (int)k;
-                            fromstr = K.ToString();
-                        }
-                        fromstr = " AND distance >= " + fromstr + " ";
-                    }
-                    if (tostr != "")
-                    {
-                        if (!kmcheckBox.Checked)
-                        {
-                            Double k = Convert.ToInt32(tostr);
-                            k = k * 1.609;
-                            int K = (int)k;
-                            tostr = K.ToString();
-                        }
-                        tostr = " AND distance <= " + tostr + " ";
-                    }
-                    //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
-                    if (version)
-                    {
-                        command.CommandText = "SELECT * FROM reported WHERE version = '" + ver + "'";
-                    }
-                    else if (datecheckBox.Checked)
-                    {
-                        command.CommandText = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
-                    }
-                    else
-                    {
-                        command.CommandText = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
-                    }
-
-
-
-                    MySqlDataReader Reader;
-                    Reader = command.ExecuteReader();
-
-
-                    while (Reader.Read())
-                    {
-                        found = true;
-
-                        if (i < maxrows && i < tablecount)   //only show first maxrows rows, or to length of reported table
-                        {
-                            clearRX();
-                            clearcells();
-                            try
+                            if (callFiltertextBox.Text.Contains("*"))
                             {
-                                RX.rx_sign = "";
-                                RX.time = (DateTime)Reader["time"];
-                                RX.band = (Int16)Reader["band"];
-                                RX.rx_sign = (string)Reader["rx_sign"];
-                                RX.rx_loc = (string)Reader["rx_loc"];
-                                RX.tx_sign = (string)Reader["tx_sign"];
-                                RX.tx_loc = (string)Reader["tx_loc"];
-                                RX.distance = (int)Reader["distance"];
-                                RX.azimuth = (int)Reader["azimuth"];
-                                RX.frequency = (int)Reader["frequency"];
-                                RX.power = (Int16)Reader["power"];
-                                RX.snr = (Int16)Reader["snr"];
-                                RX.drift = (Int16)Reader["drift"];
-                                RX.version = (string)Reader["version"];
+                                callFiltertextBox.Text = callFiltertextBox.Text.Replace("*", "");
                             }
-                            catch
+                            callstr = " AND rx_sign LIKE '" + callFiltertextBox.Text.Trim() + "%' ";
+                        }
+                        fromstr = DFromtextBox.Text.Trim();
+                        tostr = DTotextBox.Text.Trim();
+                        if (fromstr != "")
+                        {
+                            if (!kmcheckBox.Checked)
                             {
+                                Double k = Convert.ToInt32(fromstr);
+                                k = k * 1.609;
+                                int K = (int)k;
+                                fromstr = K.ToString();
                             }
-
-                            if (RX.rx_sign != "" && RX.rx_sign != null)
+                            fromstr = " AND distance >= " + fromstr + " ";
+                        }
+                        if (tostr != "")
+                        {
+                            if (!kmcheckBox.Checked)
                             {
+                                Double k = Convert.ToInt32(tostr);
+                                k = k * 1.609;
+                                int K = (int)k;
+                                tostr = K.ToString();
+                            }
+                            tostr = " AND distance <= " + tostr + " ";
+                        }
+                        //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
+                        if (version)
+                        {
+                            command.CommandText = "SELECT * FROM reported WHERE version = '" + ver + "'";
+                        }
+                        else if (datecheckBox.Checked)
+                        {
+                            command.CommandText = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+                        }
+                        else
+                        {
+                            command.CommandText = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+                        }
+
+
+
+                        MySqlDataReader Reader;
+                        Reader = command.ExecuteReader();
+
+                    lock (_lock)
+                    {
+                        while (Reader.Read())
+                        {
+                            found = true;
+
+                            if (i < maxrows && i < tablecount)   //only show first maxrows rows, or to length of reported table
+                            {
+                                clearRX();
+                                clearcells();
                                 try
                                 {
-                                    cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
-                                    cells[1] = RX.tx_sign; //tx sign
-                                    double f = Convert.ToDouble(RX.frequency);
-                                    f = f / 1000000;
-                                    string formattedF = f.ToString("F6");
-                                    cells[2] = formattedF; //freq
-                                    string snr = Convert.ToString(RX.snr);
-                                    if (RX.snr > 0)
-                                    {
-                                        snr = "+" + snr;
-                                    }
-                                    cells[3] = snr;  //snr
-                                    cells[4] = RX.drift.ToString();  //drift
-                                    cells[5] = RX.tx_loc;  //tx loc
-                                    cells[6] = RX.power.ToString();   //power dBm
-                                    cells[7] = RX.rx_sign;  //reporter
-                                    cells[8] = RX.rx_loc;    //rx loc
-
-                                    cells[9] = RX.distance.ToString();   //km
-                                    int km = Convert.ToInt32(RX.distance);    //miles
-                                    cells[10] = convert_to_miles(km);
-                                    cells[11] = RX.azimuth.ToString();
-                                    cells[12] = RX.version;   //version
-                                    update_grid(); //add this row to the datagridview
+                                    RX.rx_sign = "";
+                                    RX.time = (DateTime)Reader["time"];
+                                    RX.band = (Int16)Reader["band"];
+                                    RX.rx_sign = (string)Reader["rx_sign"];
+                                    RX.rx_loc = (string)Reader["rx_loc"];
+                                    RX.tx_sign = (string)Reader["tx_sign"];
+                                    RX.tx_loc = (string)Reader["tx_loc"];
+                                    RX.distance = (int)Reader["distance"];
+                                    RX.azimuth = (int)Reader["azimuth"];
+                                    RX.frequency = (int)Reader["frequency"];
+                                    RX.power = (Int16)Reader["power"];
+                                    RX.snr = (Int16)Reader["snr"];
+                                    RX.drift = (Int16)Reader["drift"];
+                                    RX.version = (string)Reader["version"];
                                 }
                                 catch
                                 {
                                 }
+
+                                if (RX.rx_sign != "" && RX.rx_sign != null)
+                                {
+                                    try
+                                    {
+                                        cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
+                                        cells[1] = RX.tx_sign; //tx sign
+                                        double f = Convert.ToDouble(RX.frequency);
+                                        f = f / 1000000;
+                                        string formattedF = f.ToString("F6");
+                                        cells[2] = formattedF; //freq
+                                        string snr = Convert.ToString(RX.snr);
+                                        if (RX.snr > 0)
+                                        {
+                                            snr = "+" + snr;
+                                        }
+                                        cells[3] = snr;  //snr
+                                        cells[4] = RX.drift.ToString();  //drift
+                                        cells[5] = RX.tx_loc;  //tx loc
+                                        cells[6] = RX.power.ToString();   //power dBm
+                                        cells[7] = RX.rx_sign;  //reporter
+                                        cells[8] = RX.rx_loc;    //rx loc
+
+                                        cells[9] = RX.distance.ToString();   //km
+                                        int km = Convert.ToInt32(RX.distance);    //miles
+                                        cells[10] = convert_to_miles(km);
+                                        cells[11] = RX.azimuth.ToString();
+                                        cells[12] = RX.version;   //version
+                                        update_grid(); //add this row to the datagridview
+                                    }
+                                    catch
+                                    {
+                                    }
+                                }
+                                i++;
                             }
-                            i++;
+                            else
+                            {
+                                break;
+                            }
+
                         }
-                        else
-                        {
-                            break;
-                        }
+                        Reader.Close();
+                        connection.Close();
+                        databaseError = false;
+                    }
 
                     }
-                    Reader.Close();
-                    connection.Close();
-                    databaseError = false;
+                    catch
+                    {
 
-                }
-                catch
-                {
+                        //databaseError = true; //stop wasting time trying to connect if database error - ignore for present
+                        found = false;
+                        connection.Close();
 
-                    //databaseError = true; //stop wasting time trying to connect if database error - ignore for present
-                    found = false;
-                    connection.Close();
-
-                }
+                    }
+                
             }
             return found;
         }
