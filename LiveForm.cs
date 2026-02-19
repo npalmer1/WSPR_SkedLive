@@ -87,7 +87,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.12";
+            vers = "0.1.13";
 
 
             int index = PlistBox.TopIndex;
@@ -877,11 +877,17 @@ namespace WSPR_Live
                 {
 
                 }
-
-
-
                 MySqlDataReader Reader;
-                Reader = command.ExecuteReader();
+                command.CommandTimeout = 60; // seconds
+                try
+                {                   
+                    Reader = command.ExecuteReader();
+                }
+                catch
+                {
+                    Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
+                    return false;
+                }
 
                 Monitor.Enter(_lock);
                 {
