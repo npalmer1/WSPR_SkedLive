@@ -581,8 +581,16 @@ namespace WSPR_Live
                 command.CommandText = "SELECT * FROM reported ORDER BY time DESC LIMIT " + maxrows;
                 MySqlDataReader Reader;
 
-                command.CommandTimeout = 60; // seconds
-                Reader = command.ExecuteReader();
+                try
+                {
+                    command.CommandTimeout = 60; // seconds
+                    Reader = command.ExecuteReader();
+                }
+                catch
+                {
+                    Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
+                    return false;
+                }
                 Monitor.Enter(_lock);
                 {
                     try
