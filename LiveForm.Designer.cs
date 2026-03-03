@@ -79,6 +79,7 @@
             disabledlabel = new Label();
             CWSSBlistBox = new ListBox();
             label10 = new Label();
+            label11 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -531,12 +532,22 @@
             label10.TabIndex = 38;
             label10.Text = "CW/SSB \r\npower (W)";
             // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new Point(1037, 541);
+            label11.Name = "label11";
+            label11.Size = new Size(88, 15);
+            label11.TabIndex = 39;
+            label11.Text = "for comparison";
+            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(1176, 604);
+            Controls.Add(label11);
             Controls.Add(label10);
             Controls.Add(CWSSBlistBox);
             Controls.Add(disabledlabel);
@@ -630,5 +641,6 @@
         private DataGridViewTextBoxColumn Column14;
         private DataGridViewTextBoxColumn Column15;
         private DataGridViewTextBoxColumn Column13;
+        private Label label11;
     }
 }
