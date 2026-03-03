@@ -452,7 +452,7 @@ namespace WSPR_Live
                     int pwrW = 100;
                     int dBm = 50;
                     string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
-                    if (CWSSBlistBox.SelectedValue != null)
+                    if (CWSSBlistBox.SelectedIndex >-1)
                     {
                         if (int.TryParse(cwssbpwr, out pwrW))
                         {
@@ -535,7 +535,7 @@ namespace WSPR_Live
             try
             {
                 //dBm = 10 * log10(pwrW);
-                dBm = (int)(10 * Math.Log10(pwrW));
+                dBm = (int)(10 * Math.Log10(pwrW*1000));
             }
             catch
             {
@@ -632,7 +632,7 @@ namespace WSPR_Live
                 int pwrW = 100;
                 int dBm = 50;
                 string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
-                if (CWSSBlistBox.SelectedValue != null)
+                if (CWSSBlistBox.SelectedIndex > -1)
                 {
                     if (int.TryParse(cwssbpwr, out pwrW))
                     {
@@ -766,25 +766,25 @@ namespace WSPR_Live
             int ssbL = snr + diff;
 
             string ssb = "";
-            if (ssbL < 8)
+            if (ssbL < 5)
             {
                 ssb = "unusable";
             }
-            else if (ssbL > 7 && ssbL < 13)
+            else if (ssbL >=5  && ssbL < 10)
             {
                 ssb = "bordeline";
             }
-            else if (ssbL >= 13 && ssbL < 18)
+            else if (ssbL >= 10 && ssbL < 12)
             {
                 ssb = "workable";
             }
-            else if (ssbL >= 18 && ssbL < 23)
+            else if (ssbL >= 12 && ssbL < 15)
             {
                 ssb = "good";
             }
-            else if (ssbL >= 23)
+            else if (ssbL >= 15)
             {
-                ssb = "strong";
+                ssb = "excellent";
             }
             return ssb;
         }
@@ -793,15 +793,15 @@ namespace WSPR_Live
             int diff = dBm - pwr;
             int cwL = snr + diff;
             string cw = "";
-            if (cwL < -12)
+            if (cwL < -10)
             {
                 cw = "unusable";
             }
-            else if (cwL >= -12 && cwL < -7)
+            else if (cwL >= -10 && cwL < -6)
             {
                 cw = "very weak";
             }
-            else if (cwL >= -7 && cwL < -2)
+            else if (cwL >= -6 && cwL < -2)
             {
                 cw = "copyable";
             }
@@ -1024,7 +1024,7 @@ namespace WSPR_Live
                 int pwrW = 100;
                 int dBm = 50;
                 string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
-                if (CWSSBlistBox.SelectedValue != null)
+                if (CWSSBlistBox.SelectedIndex >-1)
                 {
                     if (int.TryParse(cwssbpwr, out pwrW))
                     {
@@ -1642,7 +1642,7 @@ namespace WSPR_Live
         private void CWSSBlistBox_SelectedValueChanged(object sender, EventArgs e)
         {
             dataGridView1.Columns[12].HeaderText = "CW @" + CWSSBlistBox.SelectedItem.ToString() + "W";
-            dataGridView1.Columns[13].HeaderText = "CW @" + CWSSBlistBox.SelectedItem.ToString() + "W";
+            dataGridView1.Columns[13].HeaderText = "SSB @" + CWSSBlistBox.SelectedItem.ToString() + "W";
         }
     }
 }

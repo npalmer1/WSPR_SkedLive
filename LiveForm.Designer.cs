@@ -512,20 +512,22 @@
             // 
             // CWSSBlistBox
             // 
+            CWSSBlistBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             CWSSBlistBox.FormattingEnabled = true;
             CWSSBlistBox.Items.AddRange(new object[] { "5", "10", "15", "20", "30", "50", "70", "100", "200", "300", "500", "700", "1000", "1500", "2000" });
             CWSSBlistBox.Location = new Point(1102, 513);
             CWSSBlistBox.Name = "CWSSBlistBox";
-            CWSSBlistBox.Size = new Size(52, 19);
+            CWSSBlistBox.Size = new Size(52, 17);
             CWSSBlistBox.TabIndex = 37;
             CWSSBlistBox.SelectedValueChanged += CWSSBlistBox_SelectedValueChanged;
             // 
             // label10
             // 
             label10.AutoSize = true;
-            label10.Location = new Point(1034, 513);
+            label10.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label10.Location = new Point(1037, 513);
             label10.Name = "label10";
-            label10.Size = new Size(62, 30);
+            label10.Size = new Size(60, 26);
             label10.TabIndex = 38;
             label10.Text = "CW/SSB \r\npower (W)";
             // 
