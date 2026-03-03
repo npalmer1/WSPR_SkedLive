@@ -87,12 +87,16 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.13";
+            vers = "0.1.14";
 
 
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
             PlistBox.SelectedIndex = index;
+
+            index = CWSSBlistBox.FindStringExact("100");
+            if (index != ListBox.NoMatches) { CWSSBlistBox.SelectedIndex = index; }
+
 
             callFiltertextBox.CharacterCasing = CharacterCasing.Upper;
             calltextBox.CharacterCasing = CharacterCasing.Upper;
@@ -445,6 +449,26 @@ namespace WSPR_Live
 
                     string line = "";
 
+                    int pwrW = 100;
+                    int dBm = 50;
+                    string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
+                    if (CWSSBlistBox.SelectedValue != null)
+                    {
+                        if (int.TryParse(cwssbpwr, out pwrW))
+                        {
+                            pwrW = pwrW;
+                        }
+                        else
+                        {
+                            pwrW = 100;
+                        }
+
+                    }
+                    else
+                    {
+                        pwrW = 100;
+                    }
+                    dBm = convertTodBm(pwrW);
 
                     while ((line = reader.ReadLine()) != null || !reader.EndOfStream)
                     {
@@ -467,7 +491,7 @@ namespace WSPR_Live
                             }
                             else //if other call then just fill grid
                             {
-                                fill_cells();
+                                fill_cells(dBm);
                             }
                         }
 
@@ -505,7 +529,20 @@ namespace WSPR_Live
 
         }
 
-
+        private int convertTodBm(int pwrW)
+        {
+            int dBm = 0;
+            try
+            {
+                //dBm = 10 * log10(pwrW);
+                dBm = (int)(10 * Math.Log10(pwrW));
+            }
+            catch
+            {
+                dBm = 50;
+            }
+            return dBm;
+        }
 
 
         private async Task show_results() // read back from the reported table to populate the datagridview
@@ -564,7 +601,7 @@ namespace WSPR_Live
             //DateTime d = new DateTime();
             int i = 0;
             bool found = false;
-            
+
             string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
             MySqlConnection connection = new MySqlConnection(myConnectionString);
             if (!databaseError)
@@ -591,6 +628,28 @@ namespace WSPR_Live
                     Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
                     return false;
                 }
+
+                int pwrW = 100;
+                int dBm = 50;
+                string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
+                if (CWSSBlistBox.SelectedValue != null)
+                {
+                    if (int.TryParse(cwssbpwr, out pwrW))
+                    {
+                        pwrW = pwrW;
+                    }
+                    else
+                    {
+                        pwrW = 100;
+                    }
+
+                }
+                else
+                {
+                    pwrW = 100;
+                }
+                dBm = convertTodBm(pwrW);
+
                 Monitor.Enter(_lock);
                 {
                     try
@@ -624,7 +683,7 @@ namespace WSPR_Live
                                 RX.version = (string)Reader["version"];
                                 if (RX.rx_sign != "" && RX.rx_sign != null)
                                 {
-                                    fill_cells();
+                                    fill_cells(dBm);
                                 }
 
                                 i++;
@@ -657,12 +716,12 @@ namespace WSPR_Live
 
                     }
                 }
-                
+
             }
             return found;
         }
 
-        private void fill_cells()
+        private void fill_cells(int dBm)
         {
             //clearcells();
             try
@@ -689,7 +748,9 @@ namespace WSPR_Live
                 int km = Convert.ToInt32(RX.distance);    //miles
                 cells[10] = convert_to_miles(km);
                 cells[11] = RX.azimuth.ToString();
-                cells[12] = RX.version;   //version
+                cells[14] = RX.version;   //version
+                cells[12] = getCW(RX.snr, RX.power, dBm);
+                cells[13] = getSSB(RX.snr, RX.power, dBm);
             }
             catch
             {
@@ -698,7 +759,70 @@ namespace WSPR_Live
             update_grid(); //add this row to the datagridview
         }
 
+        private string getSSB(int snr, int pwr, int dBm)
+        {
 
+            int diff = dBm - pwr;
+            int ssbL = snr + diff;
+
+            string ssb = "";
+            if (ssbL < 8)
+            {
+                ssb = "unusable";
+            }
+            else if (ssbL > 7 && ssbL < 13)
+            {
+                ssb = "bordeline";
+            }
+            else if (ssbL >= 13 && ssbL < 18)
+            {
+                ssb = "workable";
+            }
+            else if (ssbL >= 18 && ssbL < 23)
+            {
+                ssb = "good";
+            }
+            else if (ssbL >= 23)
+            {
+                ssb = "strong";
+            }
+            return ssb;
+        }
+        private string getCW(int snr, int pwr, int dBm)
+        {
+            int diff = dBm - pwr;
+            int cwL = snr + diff;
+            string cw = "";
+            if (cwL < -12)
+            {
+                cw = "unusable";
+            }
+            else if (cwL >= -12 && cwL < -7)
+            {
+                cw = "very weak";
+            }
+            else if (cwL >= -7 && cwL < -2)
+            {
+                cw = "copyable";
+            }
+            else if (cwL >= -2 && cwL < 3)
+            {
+                cw = "readable";
+            }
+            else if (cwL >= 3 && cwL < 8)
+            {
+                cw = "solid";
+            }
+            else if (cwL >= 8 && cwL < 13)
+            {
+                cw = "very good";
+            }
+            else if (cwL >= 13)
+            {
+                cw = "strong";
+            }
+            return cw;
+        }
         private void filter_results(bool version, string ver)
         {
             dataGridView1.Rows.Clear();
@@ -888,7 +1012,7 @@ namespace WSPR_Live
                 MySqlDataReader Reader;
                 command.CommandTimeout = 60; // seconds
                 try
-                {                   
+                {
                     Reader = command.ExecuteReader();
                 }
                 catch
@@ -896,6 +1020,27 @@ namespace WSPR_Live
                     Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
                     return false;
                 }
+
+                int pwrW = 100;
+                int dBm = 50;
+                string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
+                if (CWSSBlistBox.SelectedValue != null)
+                {
+                    if (int.TryParse(cwssbpwr, out pwrW))
+                    {
+                        pwrW = pwrW;
+                    }
+                    else
+                    {
+                        pwrW = 100;
+                    }
+
+                }
+                else
+                {
+                    pwrW = 100;
+                }
+                dBm = convertTodBm(pwrW);
 
                 Monitor.Enter(_lock);
                 {
@@ -956,7 +1101,9 @@ namespace WSPR_Live
                                         int km = Convert.ToInt32(RX.distance);    //miles
                                         cells[10] = convert_to_miles(km);
                                         cells[11] = RX.azimuth.ToString();
-                                        cells[12] = RX.version;   //version
+                                        cells[14] = RX.version;   //version
+                                        cells[12] = getCW(RX.snr, RX.power, dBm);
+                                        cells[13] = getSSB(RX.snr, RX.power, dBm);
                                         update_grid(); //add this row to the datagridview
                                     }
                                     catch
@@ -1001,7 +1148,7 @@ namespace WSPR_Live
             try
             {
                 row.CreateCells(dataGridView1);
-                for (int i = 0; i < 13; i++)
+                for (int i = 0; i < 15; i++)
                 {
 
                     row.Cells[i].Value = cells[i];
@@ -1229,8 +1376,8 @@ namespace WSPR_Live
             int min = 30;
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
-           
-                min = findPeriod();            
+
+            min = findPeriod();
             updateNow(min, true);
         }
         private async Task updateNow(int min, bool wait)
@@ -1286,11 +1433,11 @@ namespace WSPR_Live
         private int findPeriod() //find period in minutes
         {
             try
-            {              
+            {
                 int index = PlistBox.TopIndex;
                 string s = PlistBox.Items[index].ToString();
                 if (s != "" && s != null)
-                {                 
+                {
 
                     int i = 10;
                     switch (index)
@@ -1378,9 +1525,9 @@ namespace WSPR_Live
                 int min = 20;
                 int index = PlistBox.TopIndex;
                 string text = PlistBox.Items[index].ToString();
-              
-                    min = findPeriod();
-                
+
+                min = findPeriod();
+
                 if (startCount > startCountMax)  //X minutes
                 {
                     startCount = 0;
@@ -1477,7 +1624,7 @@ namespace WSPR_Live
                 {
                     int colIndex = e.ColumnIndex;
                     string text = dataGridView1.Rows[rowIndex].Cells[colIndex].Value?.ToString();
-                    if (colIndex == 12) //version column
+                    if (colIndex == 14) //version column
                     {
                         var res = Msg.ynMessageBox("Search by version (Y/N)?", "Version");
                         if (res == DialogResult.Yes)
@@ -1492,5 +1639,10 @@ namespace WSPR_Live
 
         }
 
+        private void CWSSBlistBox_SelectedValueChanged(object sender, EventArgs e)
+        {
+            dataGridView1.Columns[12].HeaderText = "CW @" + CWSSBlistBox.SelectedItem.ToString() + "W";
+            dataGridView1.Columns[13].HeaderText = "CW @" + CWSSBlistBox.SelectedItem.ToString() + "W";
+        }
     }
 }

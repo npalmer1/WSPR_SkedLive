@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WSPR_Live": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

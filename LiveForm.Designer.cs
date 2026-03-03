@@ -63,6 +63,8 @@
             Column10 = new DataGridViewTextBoxColumn();
             Column11 = new DataGridViewTextBoxColumn();
             Column12 = new DataGridViewTextBoxColumn();
+            Column14 = new DataGridViewTextBoxColumn();
+            Column15 = new DataGridViewTextBoxColumn();
             Column13 = new DataGridViewTextBoxColumn();
             label4 = new Label();
             PlistBox = new ListBox();
@@ -75,6 +77,8 @@
             label9 = new Label();
             Clearbutton = new Button();
             disabledlabel = new Label();
+            CWSSBlistBox = new ListBox();
+            label10 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -275,11 +279,11 @@
             // dataGridView1
             // 
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { Column1, Column2, Column3, Column4, Column5, Column6, Column7, Column8, Column9, Column10, Column11, Column12, Column13 });
+            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { Column1, Column2, Column3, Column4, Column5, Column6, Column7, Column8, Column9, Column10, Column11, Column12, Column14, Column15, Column13 });
             dataGridView1.Location = new Point(12, 28);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
-            dataGridView1.Size = new Size(1005, 476);
+            dataGridView1.Size = new Size(1142, 476);
             dataGridView1.TabIndex = 3;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
@@ -353,17 +357,19 @@
             // 
             // Column10
             // 
+            Column10.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             Column10.HeaderText = "km";
             Column10.Name = "Column10";
             Column10.ReadOnly = true;
-            Column10.Width = 49;
+            Column10.Width = 52;
             // 
             // Column11
             // 
+            Column11.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             Column11.HeaderText = "miles";
             Column11.Name = "Column11";
             Column11.ReadOnly = true;
-            Column11.Width = 60;
+            Column11.Width = 52;
             // 
             // Column12
             // 
@@ -371,6 +377,22 @@
             Column12.Name = "Column12";
             Column12.ReadOnly = true;
             Column12.Width = 45;
+            // 
+            // Column14
+            // 
+            Column14.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            Column14.HeaderText = "CW @100W";
+            Column14.Name = "Column14";
+            Column14.ReadOnly = true;
+            Column14.Width = 87;
+            // 
+            // Column15
+            // 
+            Column15.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            Column15.HeaderText = "SSB @100W";
+            Column15.Name = "Column15";
+            Column15.ReadOnly = true;
+            Column15.Width = 87;
             // 
             // Column13
             // 
@@ -398,7 +420,6 @@
             PlistBox.Size = new Size(91, 19);
             PlistBox.TabIndex = 27;
             PlistBox.SelectedIndexChanged += PlistBox_SelectedIndexChanged;
-          
             // 
             // label8
             // 
@@ -489,12 +510,33 @@
             disabledlabel.Text = "Updates disabled";
             disabledlabel.Visible = false;
             // 
+            // CWSSBlistBox
+            // 
+            CWSSBlistBox.FormattingEnabled = true;
+            CWSSBlistBox.Items.AddRange(new object[] { "5", "10", "15", "20", "30", "50", "70", "100", "200", "300", "500", "700", "1000", "1500", "2000" });
+            CWSSBlistBox.Location = new Point(1102, 513);
+            CWSSBlistBox.Name = "CWSSBlistBox";
+            CWSSBlistBox.Size = new Size(52, 19);
+            CWSSBlistBox.TabIndex = 37;
+            CWSSBlistBox.SelectedValueChanged += CWSSBlistBox_SelectedValueChanged;
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Location = new Point(1034, 513);
+            label10.Name = "label10";
+            label10.Size = new Size(62, 30);
+            label10.TabIndex = 38;
+            label10.Text = "CW/SSB \r\npower (W)";
+            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(1038, 604);
+            ClientSize = new Size(1176, 604);
+            Controls.Add(label10);
+            Controls.Add(CWSSBlistBox);
             Controls.Add(disabledlabel);
             Controls.Add(Clearbutton);
             Controls.Add(label9);
@@ -562,19 +604,6 @@
         private System.Windows.Forms.ListBox PlistBox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label Plabel;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column6;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column8;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column9;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column10;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column11;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column12;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column13;
         private System.Windows.Forms.Timer timer2;
         private CheckBox updatecheckBox;
         private TextBox calltextBox;
@@ -582,5 +611,22 @@
         private Label label9;
         private Button Clearbutton;
         private Label disabledlabel;
+        private ListBox CWSSBlistBox;
+        private Label label10;
+        private DataGridViewTextBoxColumn Column1;
+        private DataGridViewTextBoxColumn Column2;
+        private DataGridViewTextBoxColumn Column3;
+        private DataGridViewTextBoxColumn Column4;
+        private DataGridViewTextBoxColumn Column5;
+        private DataGridViewTextBoxColumn Column6;
+        private DataGridViewTextBoxColumn Column7;
+        private DataGridViewTextBoxColumn Column8;
+        private DataGridViewTextBoxColumn Column9;
+        private DataGridViewTextBoxColumn Column10;
+        private DataGridViewTextBoxColumn Column11;
+        private DataGridViewTextBoxColumn Column12;
+        private DataGridViewTextBoxColumn Column14;
+        private DataGridViewTextBoxColumn Column15;
+        private DataGridViewTextBoxColumn Column13;
     }
 }
