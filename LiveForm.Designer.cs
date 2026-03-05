@@ -80,12 +80,21 @@
             CWSSBlistBox = new ListBox();
             label10 = new Label();
             label11 = new Label();
+            configbutton = new Button();
+            configgroupBox = new GroupBox();
+            label13 = new Label();
+            cancelbutton = new Button();
+            savebutton = new Button();
+            owncalltextBox = new TextBox();
+            label12 = new Label();
+            prefcheckBox = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            configgroupBox.SuspendLayout();
             SuspendLayout();
             // 
             // testDBbutton
             // 
-            testDBbutton.Location = new Point(853, 1);
+            testDBbutton.Location = new Point(933, 1);
             testDBbutton.Name = "testDBbutton";
             testDBbutton.Size = new Size(164, 21);
             testDBbutton.TabIndex = 0;
@@ -96,7 +105,7 @@
             // updatebutton
             // 
             updatebutton.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            updatebutton.Location = new Point(709, 1);
+            updatebutton.Location = new Point(795, 2);
             updatebutton.Margin = new Padding(0);
             updatebutton.Name = "updatebutton";
             updatebutton.Size = new Size(126, 21);
@@ -541,12 +550,100 @@
             label11.TabIndex = 39;
             label11.Text = "for comparison";
             // 
+            // configbutton
+            // 
+            configbutton.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            configbutton.Location = new Point(689, 3);
+            configbutton.Margin = new Padding(0);
+            configbutton.Name = "configbutton";
+            configbutton.Size = new Size(76, 22);
+            configbutton.TabIndex = 40;
+            configbutton.Text = "Config";
+            configbutton.UseVisualStyleBackColor = true;
+            configbutton.Click += configbutton_Click;
+            // 
+            // configgroupBox
+            // 
+            configgroupBox.BackColor = Color.Cornsilk;
+            configgroupBox.Controls.Add(prefcheckBox);
+            configgroupBox.Controls.Add(label13);
+            configgroupBox.Controls.Add(cancelbutton);
+            configgroupBox.Controls.Add(savebutton);
+            configgroupBox.Controls.Add(owncalltextBox);
+            configgroupBox.Controls.Add(label12);
+            configgroupBox.Location = new Point(699, 165);
+            configgroupBox.Name = "configgroupBox";
+            configgroupBox.Size = new Size(364, 237);
+            configgroupBox.TabIndex = 41;
+            configgroupBox.TabStop = false;
+            configgroupBox.Text = "Configuration";
+            configgroupBox.Visible = false;
+            // 
+            // label13
+            // 
+            label13.AutoSize = true;
+            label13.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label13.Location = new Point(89, 71);
+            label13.Name = "label13";
+            label13.Size = new Size(174, 13);
+            label13.TabIndex = 4;
+            label13.Text = "Your call to be saved in database";
+            // 
+            // cancelbutton
+            // 
+            cancelbutton.Location = new Point(208, 195);
+            cancelbutton.Name = "cancelbutton";
+            cancelbutton.Size = new Size(75, 23);
+            cancelbutton.TabIndex = 3;
+            cancelbutton.Text = "Cancel";
+            cancelbutton.UseVisualStyleBackColor = true;
+            cancelbutton.Click += cancelbutton_Click;
+            // 
+            // savebutton
+            // 
+            savebutton.Location = new Point(89, 195);
+            savebutton.Name = "savebutton";
+            savebutton.Size = new Size(75, 23);
+            savebutton.TabIndex = 2;
+            savebutton.Text = "Save";
+            savebutton.UseVisualStyleBackColor = true;
+            savebutton.Click += savebutton_Click;
+            // 
+            // owncalltextBox
+            // 
+            owncalltextBox.Location = new Point(106, 45);
+            owncalltextBox.Name = "owncalltextBox";
+            owncalltextBox.Size = new Size(132, 23);
+            owncalltextBox.TabIndex = 1;
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Location = new Point(22, 48);
+            label12.Name = "label12";
+            label12.Size = new Size(78, 15);
+            label12.TabIndex = 0;
+            label12.Text = "Own callsign:";
+            // 
+            // prefcheckBox
+            // 
+            prefcheckBox.AutoSize = true;
+            prefcheckBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            prefcheckBox.Location = new Point(34, 104);
+            prefcheckBox.Name = "prefcheckBox";
+            prefcheckBox.Size = new Size(299, 17);
+            prefcheckBox.TabIndex = 5;
+            prefcheckBox.Text = "Use this call instead of the one from WSPR Scheduler";
+            prefcheckBox.UseVisualStyleBackColor = true;
+            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(1176, 604);
+            Controls.Add(configgroupBox);
+            Controls.Add(configbutton);
             Controls.Add(label11);
             Controls.Add(label10);
             Controls.Add(CWSSBlistBox);
@@ -584,7 +681,10 @@
             Name = "LiveForm";
             Text = "Received transmissions for this call";
             Load += LiveForm_Load;
+            Shown += LiveForm_Shown;
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            configgroupBox.ResumeLayout(false);
+            configgroupBox.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -642,5 +742,13 @@
         private DataGridViewTextBoxColumn Column15;
         private DataGridViewTextBoxColumn Column13;
         private Label label11;
+        private Button configbutton;
+        private GroupBox configgroupBox;
+        private Button cancelbutton;
+        private Button savebutton;
+        private TextBox owncalltextBox;
+        private Label label12;
+        private Label label13;
+        private CheckBox prefcheckBox;
     }
 }

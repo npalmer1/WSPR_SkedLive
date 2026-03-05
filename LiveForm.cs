@@ -17,6 +17,7 @@ using System.IO;
 
 using System.Net.Http;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 
@@ -32,6 +33,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WSPR_Sked;
+
 //using WSPR_Live;
 using static System.ComponentModel.Design.ObjectSelectorEditor;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -64,6 +67,7 @@ namespace WSPR_Live
         string db_server = "127.0.0.1";
         string db_user = "admin";
         string db_pass = "wspr";
+        string prev_call = "G4GCI";
         string vers = "";
 
 
@@ -87,8 +91,13 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.14";
+            vers = "0.1.15";
 
+            if (!checkDB("wspr_rx"))
+            {
+                Msg.TMessageBox("Unable to connect to database", "Database connection error", 3000);
+                return;
+            }
 
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
@@ -125,11 +134,19 @@ namespace WSPR_Live
             db_server = "127.0.0.1";
             db_user = "admin";
             getUserandPassword();
+            prev_call = Callsign;
+            getCall();
             set_header(Callsign, db_server, db_user, db_pass);
             await Task.Delay(2000);
             int min = 30;
-            await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
+            string cwssbpwr = "100";
+            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+            /*await Task.Run(() =>
+            {
+                _ =  get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
+            });*/
 
+           await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
 
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
@@ -152,6 +169,26 @@ namespace WSPR_Live
 
         }
 
+        private bool checkDB(string db)
+        {
+            string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=" + db;
+
+            MySqlConnection connection = new MySqlConnection(myConnectionString);
+
+
+            try
+            {
+                connection.Open();
+                connection.Close();
+                return true;
+            }
+            catch
+            {
+
+                connection.Close();
+                return false;
+            }
+        }
         public struct RX_data
         {
             public Int64 id;
@@ -252,6 +289,13 @@ namespace WSPR_Live
                                     }
                                 }
                             }
+                            else
+                            { 
+                                Msg.TMessageBox("No callsign configured - see Config", "Callsign configuration",3000);
+                                
+                              
+                            }
+
                         }
 
                         if (!ok)
@@ -267,8 +311,154 @@ namespace WSPR_Live
                     }
                 }
             }
+           
 
         }
+
+        private bool getCall()
+        {   //if no call in getuserand pass
+            bool ok = false;
+            string call = "";
+            string pref = "no";
+            string slash = "/";
+            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string filepath = homeDirectory;
+            if (Path.Exists(filepath))
+            {
+
+                if (filepath.EndsWith(slash))
+                {
+                    slash = "";
+                }
+                filepath = filepath + slash + "LiveCall";
+                if (System.IO.File.Exists(filepath))
+                {
+                    try
+                    {
+                        using (StreamReader reader = new StreamReader(filepath))
+                        {
+                            call = reader.ReadLine();
+                            pref = reader.ReadLine();
+                            reader.Close();
+                           
+                        }
+                        if (call != null && call != "")
+                        {
+                            //Callsign = call.Trim();
+                            owncalltextBox.Text = call;
+                            ok = true;
+                        }
+                        else if (Callsign.Trim() == "")
+                        {
+                            Msg.TMessageBox("No callsign file saved", "Callsign", 2000);
+                            return ok;
+                        }
+                        else
+                        {
+                            return ok;
+                        }
+                        if (pref != null && pref != "" && ok)
+                        {
+                            if (pref.Trim().ToLower() == "yes")
+                            {
+                                prefcheckBox.Checked = true;
+                                Callsign = call.Trim();
+                            }
+                            else
+                            {
+                                prefcheckBox.Checked = false;
+                            }
+                        }   
+                    }
+                    catch (Exception ex)
+                    {
+                        Msg.TMessageBox("Unable to locate callsign", "Callsign", 2000);
+                        return ok;
+                    }
+                }
+                else
+                {
+                   // Msg.TMessageBox("No callsign file saved", "Callsign", 2000);
+                    return ok;
+                }
+            }
+            else
+            {
+                //Msg.TMessageBox("Unable to locate callsign", "Callsign",2000);
+                return ok;
+            }
+            return ok;
+        }
+
+        private async void saveCall(bool default_call)
+        {
+            bool ok = false;
+            string call = "";
+            string pref = "no";
+            string slash = "/";
+            bool change = false;
+            string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string filepath = homeDirectory;
+            if (prefcheckBox.Checked && default_call)
+            {
+                pref = "yes";
+                Callsign = owncalltextBox.Text.Trim();
+                this.Text = headerline.Replace(originalcall, Callsign);
+            }
+            else
+            {
+                pref = "no";
+                Callsign = prev_call;
+                this.Text = headerline.Replace(originalcall, Callsign);
+            }
+            if (originalcall != Callsign) { change = true; }
+            if (Path.Exists(filepath))
+            {
+
+                if (filepath.EndsWith(slash))
+                {
+                    slash = "";
+                }
+                if (owncalltextBox.Text != null && owncalltextBox.Text != "")
+                {
+                    call = owncalltextBox.Text.Trim();
+                }
+                filepath = filepath + slash + "LiveCall";
+
+                try
+                {
+                    using (StreamWriter writer = new StreamWriter(filepath))
+                    {
+                        writer.WriteLine(call);
+                        writer.WriteLine(pref);
+                        writer.Close();
+
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Msg.TMessageBox("Unable to save callsign", "Callsign", 2000);
+                }
+            }
+            else
+            {
+                Msg.TMessageBox("Unable to save to " + filepath, "Save", 2000);
+            }
+            if (change)
+            {
+                int min = 30;
+                string cwssbpwr = "100";
+                if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+
+                /*await Task.Run(() =>
+                {
+                    get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
+                });*/
+                await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
+            }
+        }
+        
 
         private void clearRX()
         {
@@ -356,9 +546,16 @@ namespace WSPR_Live
         }
         private async void updateResults()
         {
+            string cwssbpwr = "100";
             //MessageForm nForm = new MessageForm();
             Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
-            await show_results();
+            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+            /*await Task.Run(() =>
+            {
+                _ = show_results(cwssbpwr);
+            });*/
+
+            await show_results(cwssbpwr);
             //nForm.Dispose();
         }
 
@@ -403,7 +600,7 @@ namespace WSPR_Live
             }
             return false;
         }
-        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan, bool owncall)
+        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan, bool owncall, string cwssbpwr)
         {
             //note: band not currently used
 
@@ -430,10 +627,10 @@ namespace WSPR_Live
             while (!isUnlocked)
             {
                 //timespan eg. last 5 minutes, limit eg. 500 - no. of entries to retrieve
-                Msg.TMessageBox("Please wait - retrieving data ....", "", 30000);
+                //if (tries == 0) { Msg.TMessageBox("Please wait - retrieving data ....", "", 30000); }
                 try
                 {
-
+                    found = false;
                     int band = 0;
 
                     //note livelimit  is 1000 - max number of entries to extract from wspr.live database
@@ -451,9 +648,7 @@ namespace WSPR_Live
 
                     int pwrW = 100;
                     int dBm = 50;
-                    string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
-                    if (CWSSBlistBox.SelectedIndex >-1)
-                    {
+                   
                         if (int.TryParse(cwssbpwr, out pwrW))
                         {
                             pwrW = pwrW;
@@ -462,20 +657,18 @@ namespace WSPR_Live
                         {
                             pwrW = 100;
                         }
-
-                    }
-                    else
-                    {
-                        pwrW = 100;
-                    }
+                   
                     dBm = convertTodBm(pwrW);
 
-                    while ((line = reader.ReadLine()) != null || !reader.EndOfStream)
+                    while ((line = reader.ReadLine()) != null)
                     {
+
                         if (line != null && line != "")
                         {
+                           
                             if (!found)
                             {
+                                if (tries == 0) { Msg.TMessageBox("Please wait - retrieving data ....", "", 30000); }
                                 if (!owncall)
                                 {
                                     dataGridView1.Rows.Clear();
@@ -487,6 +680,11 @@ namespace WSPR_Live
 
                             if (owncall)
                             {
+                                /*await Task.Run(() =>
+                                {                                   
+                                    _ = Save_Received(server, db_user, db_pass); ;
+                                });*/
+
                                 await Save_Received(server, db_user, db_pass);
                             }
                             else //if other call then just fill grid
@@ -496,16 +694,23 @@ namespace WSPR_Live
                         }
 
                     }
+                   if (!found)
+                    {
+                        isUnlocked = true;
+                        Msg.TMessageBox("Unable to find call "+call+" in live data", "Call", 2500);
+                        dataGridView1.Rows.Clear();
+                        isUnlocked = true;
+                        return;
+                    }
 
-
-                    isUnlocked = true;
+                        isUnlocked = true;
 
 
                     await Task.Delay(1000);
 
                     if (owncall)
                     {
-                        await show_results();
+                        await show_results(cwssbpwr);
                     }
                     else
                     {
@@ -523,8 +728,14 @@ namespace WSPR_Live
                     tries++;
 
                 }
-
+                if (tries > 3)
+                {
+                    isUnlocked = true;
+                }
+                Thread.Sleep(800);
+                tries++;
             }
+
             //nForm.Dispose();
 
         }
@@ -535,7 +746,7 @@ namespace WSPR_Live
             try
             {
                 //dBm = 10 * log10(pwrW);
-                dBm = (int)(10 * Math.Log10(pwrW*1000));
+                dBm = (int)(10 * Math.Log10(pwrW * 1000));
             }
             catch
             {
@@ -545,7 +756,7 @@ namespace WSPR_Live
         }
 
 
-        private async Task show_results() // read back from the reported table to populate the datagridview
+        private async Task show_results(string cwssbpwr) // read back from the reported table to populate the datagridview
         {
             try
             {
@@ -554,7 +765,7 @@ namespace WSPR_Live
                 int rows = table_count();
                 if (rows > 0)
                 {
-                    await find_received(rows);
+                    await find_received(rows, cwssbpwr);
                     dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date                    
                 }
 
@@ -595,7 +806,7 @@ namespace WSPR_Live
         }
 
 
-        private async Task<bool> find_received(int tablecount) //find a slot row for display in grid from the database corresponding to the date/time from the slot        
+        private async Task<bool> find_received(int tablecount, string cwssbpwr) //find a slot row for display in grid from the database corresponding to the date/time from the slot        
         {
             DataTable Slots = new DataTable();
             //DateTime d = new DateTime();
@@ -631,8 +842,8 @@ namespace WSPR_Live
 
                 int pwrW = 100;
                 int dBm = 50;
-                string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
-                if (CWSSBlistBox.SelectedIndex > -1)
+                //string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
+                if (cwssbpwr != "")
                 {
                     if (int.TryParse(cwssbpwr, out pwrW))
                     {
@@ -770,7 +981,7 @@ namespace WSPR_Live
             {
                 ssb = "unusable";
             }
-            else if (ssbL >=5  && ssbL < 10)
+            else if (ssbL >= 5 && ssbL < 10)
             {
                 ssb = "bordeline";
             }
@@ -1024,7 +1235,7 @@ namespace WSPR_Live
                 int pwrW = 100;
                 int dBm = 50;
                 string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
-                if (CWSSBlistBox.SelectedIndex >-1)
+                if (CWSSBlistBox.SelectedIndex > -1)
                 {
                     if (int.TryParse(cwssbpwr, out pwrW))
                     {
@@ -1220,10 +1431,12 @@ namespace WSPR_Live
 
 
 
-        private void filterbutton_Click(object sender, EventArgs e)
+        private async void filterbutton_Click(object sender, EventArgs e)
         {
             //MessageForm nForm = new MessageForm();
+            string cwssbpwr = "100";
             Msg.TMessageBox("Please wait ....", "", 30000);
+            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
             if (filterbutton.Text == "Apply")
             {
                 filter_results(false, "");
@@ -1231,18 +1444,19 @@ namespace WSPR_Live
             }
             else
             {
-                show_results();
+                await show_results(cwssbpwr);
                 // filterbutton.Text = "Apply";
             }
             //nForm.Dispose();
         }
 
-        private void Clearbutton_Click(object sender, EventArgs e)
+        private async void Clearbutton_Click(object sender, EventArgs e)
         {
             //MessageForm nForm = new MessageForm();
+            string cwssbpwr = "100";
             Msg.TMessageBox("Please wait ....", "", 30000);
-
-            show_results();
+            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+            await show_results(cwssbpwr);
 
             //nForm.Dispose();
         }
@@ -1373,12 +1587,19 @@ namespace WSPR_Live
 
         private async void Nowbutton_Click(object sender, EventArgs e)
         {
+            await Task.Run(() =>
+            {
+                Nowbutton_Action();
+            });
+            //await Nowbutton_Action();
+        }
+        private async Task Nowbutton_Action()
+        {
             int min = 30;
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
-
             min = findPeriod();
-            updateNow(min, true);
+            await updateNow(min, true);
         }
         private async Task updateNow(int min, bool wait)
         {
@@ -1405,8 +1626,9 @@ namespace WSPR_Live
                 string freq = "";
                 if (!timer1.Enabled)
                 {
-
-                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
+                    string cwssbpwr = "100";
+                    if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall,cwssbpwr);
 
 
                     PlistBox.SelectedIndex = 0;
@@ -1527,15 +1749,18 @@ namespace WSPR_Live
                 string text = PlistBox.Items[index].ToString();
 
                 min = findPeriod();
-
+                //await getUserandPassword();
+                //getCall();
                 if (startCount > startCountMax)  //X minutes
                 {
+                    string cwssbpwr = "100";
+                    if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
                     startCount = 0;
-                    get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
+                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall,cwssbpwr);
 
                 }
 
-                await getUserandPassword();
+               
             }
             catch { }
 
@@ -1643,6 +1868,54 @@ namespace WSPR_Live
         {
             dataGridView1.Columns[12].HeaderText = "CW @" + CWSSBlistBox.SelectedItem.ToString() + "W";
             dataGridView1.Columns[13].HeaderText = "SSB @" + CWSSBlistBox.SelectedItem.ToString() + "W";
+        }
+
+        private void LiveForm_Shown(object sender, EventArgs e)
+        {
+            if (!checkDB("wspr_rx"))
+            {
+                this.Hide();
+                //Msg.TMessageBox("Unable to connect to mySQL", "Check mySQL", 4000);
+
+                LoadError loadError = new LoadError();
+                loadError.Show();
+            }
+        }
+
+        private void configbutton_Click(object sender, EventArgs e)
+        {
+            configgroupBox.Visible = true;
+        }
+
+        private async void savebutton_Click(object sender, EventArgs e)
+        {
+            configgroupBox.Visible = false;
+            if (prefcheckBox.Checked)
+            {
+                var res = Msg.ynMessageBox("Use this call as default (Y/N)?", "Save preferences");
+                if (res == DialogResult.Yes)
+                {
+                    saveCall(true);
+
+                    Msg.TMessageBox("Saving and updating - please wait", "Saving", 2000);
+                    await Nowbutton_Action();
+                }
+                else
+                {
+                    prefcheckBox.Checked = false;
+                    saveCall(false);
+                }
+ 
+            }
+            else
+            {
+                saveCall(false);
+            }              
+        }
+
+        private void cancelbutton_Click(object sender, EventArgs e)
+        {
+            configgroupBox.Visible = false;
         }
     }
 }
