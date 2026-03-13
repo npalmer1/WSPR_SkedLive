@@ -82,12 +82,12 @@
             label11 = new Label();
             configbutton = new Button();
             configgroupBox = new GroupBox();
+            prefcheckBox = new CheckBox();
             label13 = new Label();
             cancelbutton = new Button();
             savebutton = new Button();
             owncalltextBox = new TextBox();
             label12 = new Label();
-            prefcheckBox = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             configgroupBox.SuspendLayout();
             SuspendLayout();
@@ -116,14 +116,14 @@
             // 
             // dateTimePicker1
             // 
-            dateTimePicker1.Location = new Point(608, 510);
+            dateTimePicker1.Location = new Point(562, 509);
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.Size = new Size(137, 23);
             dateTimePicker1.TabIndex = 5;
             // 
             // dateTimePicker2
             // 
-            dateTimePicker2.Location = new Point(795, 509);
+            dateTimePicker2.Location = new Point(749, 508);
             dateTimePicker2.Name = "dateTimePicker2";
             dateTimePicker2.Size = new Size(137, 23);
             dateTimePicker2.TabIndex = 6;
@@ -131,7 +131,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(768, 513);
+            label1.Location = new Point(722, 512);
             label1.Name = "label1";
             label1.Size = new Size(21, 15);
             label1.TabIndex = 7;
@@ -140,7 +140,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(564, 514);
+            label2.Location = new Point(518, 513);
             label2.Name = "label2";
             label2.Size = new Size(38, 15);
             label2.TabIndex = 8;
@@ -150,7 +150,7 @@
             // 
             bandlistBox.FormattingEnabled = true;
             bandlistBox.Items.AddRange(new object[] { "All", "LF", "MF", "160m", "80m", "60m", "40m", "30m", "22m", "20m", "17m", "15m", "12m", "10m", "8m", "6m", "4m", "2m", "70cm", "23cm" });
-            bandlistBox.Location = new Point(309, 514);
+            bandlistBox.Location = new Point(263, 513);
             bandlistBox.Name = "bandlistBox";
             bandlistBox.Size = new Size(70, 19);
             bandlistBox.TabIndex = 11;
@@ -158,7 +158,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(266, 516);
+            label5.Location = new Point(220, 515);
             label5.Name = "label5";
             label5.Size = new Size(37, 15);
             label5.TabIndex = 12;
@@ -166,7 +166,7 @@
             // 
             // filterbutton
             // 
-            filterbutton.Location = new Point(951, 514);
+            filterbutton.Location = new Point(905, 513);
             filterbutton.Name = "filterbutton";
             filterbutton.Size = new Size(66, 23);
             filterbutton.TabIndex = 13;
@@ -177,7 +177,7 @@
             // datecheckBox
             // 
             datecheckBox.AutoSize = true;
-            datecheckBox.Location = new Point(397, 514);
+            datecheckBox.Location = new Point(351, 513);
             datecheckBox.Name = "datecheckBox";
             datecheckBox.Size = new Size(143, 19);
             datecheckBox.TabIndex = 14;
@@ -187,7 +187,7 @@
             // DFromtextBox
             // 
             DFromtextBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            DFromtextBox.Location = new Point(642, 541);
+            DFromtextBox.Location = new Point(596, 540);
             DFromtextBox.Name = "DFromtextBox";
             DFromtextBox.Size = new Size(61, 22);
             DFromtextBox.TabIndex = 15;
@@ -197,7 +197,7 @@
             // callFiltertextBox
             // 
             callFiltertextBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            callFiltertextBox.Location = new Point(457, 543);
+            callFiltertextBox.Location = new Point(411, 542);
             callFiltertextBox.Margin = new Padding(0);
             callFiltertextBox.Name = "callFiltertextBox";
             callFiltertextBox.Size = new Size(91, 22);
@@ -207,7 +207,7 @@
             // DTotextBox
             // 
             DTotextBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            DTotextBox.Location = new Point(768, 540);
+            DTotextBox.Location = new Point(722, 539);
             DTotextBox.Name = "DTotextBox";
             DTotextBox.Size = new Size(59, 22);
             DTotextBox.TabIndex = 17;
@@ -216,7 +216,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(397, 547);
+            label3.Location = new Point(351, 546);
             label3.Name = "label3";
             label3.Size = new Size(57, 15);
             label3.TabIndex = 18;
@@ -225,7 +225,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(581, 542);
+            label6.Location = new Point(535, 541);
             label6.Name = "label6";
             label6.Size = new Size(55, 15);
             label6.TabIndex = 19;
@@ -234,7 +234,7 @@
             // kmcheckBox
             // 
             kmcheckBox.AutoSize = true;
-            kmcheckBox.Location = new Point(865, 541);
+            kmcheckBox.Location = new Point(819, 540);
             kmcheckBox.Name = "kmcheckBox";
             kmcheckBox.Size = new Size(65, 19);
             kmcheckBox.TabIndex = 21;
@@ -245,7 +245,7 @@
             // Ulabel
             // 
             Ulabel.AutoSize = true;
-            Ulabel.Location = new Point(833, 541);
+            Ulabel.Location = new Point(787, 540);
             Ulabel.Name = "Ulabel";
             Ulabel.Size = new Size(26, 15);
             Ulabel.TabIndex = 22;
@@ -255,7 +255,7 @@
             // 
             Dlabel.AutoSize = true;
             Dlabel.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            Dlabel.Location = new Point(709, 543);
+            Dlabel.Location = new Point(663, 542);
             Dlabel.Name = "Dlabel";
             Dlabel.Size = new Size(56, 13);
             Dlabel.TabIndex = 23;
@@ -293,7 +293,8 @@
             dataGridView1.Location = new Point(12, 28);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
-            dataGridView1.Size = new Size(1142, 476);
+            dataGridView1.RowHeadersVisible = false;
+            dataGridView1.Size = new Size(1101, 476);
             dataGridView1.TabIndex = 3;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
             // 
@@ -415,7 +416,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(100, 515);
+            label4.Location = new Point(27, 513);
             label4.Name = "label4";
             label4.Size = new Size(160, 15);
             label4.TabIndex = 10;
@@ -499,7 +500,7 @@
             // 
             // Clearbutton
             // 
-            Clearbutton.Location = new Point(951, 547);
+            Clearbutton.Location = new Point(905, 546);
             Clearbutton.Name = "Clearbutton";
             Clearbutton.Size = new Size(66, 23);
             Clearbutton.TabIndex = 35;
@@ -525,7 +526,7 @@
             CWSSBlistBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             CWSSBlistBox.FormattingEnabled = true;
             CWSSBlistBox.Items.AddRange(new object[] { "5", "10", "15", "20", "30", "50", "70", "100", "200", "300", "500", "700", "1000", "1500", "2000" });
-            CWSSBlistBox.Location = new Point(1102, 513);
+            CWSSBlistBox.Location = new Point(1056, 512);
             CWSSBlistBox.Name = "CWSSBlistBox";
             CWSSBlistBox.Size = new Size(52, 17);
             CWSSBlistBox.TabIndex = 37;
@@ -535,7 +536,7 @@
             // 
             label10.AutoSize = true;
             label10.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label10.Location = new Point(1037, 513);
+            label10.Location = new Point(991, 512);
             label10.Name = "label10";
             label10.Size = new Size(60, 26);
             label10.TabIndex = 38;
@@ -544,7 +545,7 @@
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new Point(1037, 541);
+            label11.Location = new Point(991, 540);
             label11.Name = "label11";
             label11.Size = new Size(88, 15);
             label11.TabIndex = 39;
@@ -571,13 +572,24 @@
             configgroupBox.Controls.Add(savebutton);
             configgroupBox.Controls.Add(owncalltextBox);
             configgroupBox.Controls.Add(label12);
-            configgroupBox.Location = new Point(699, 165);
+            configgroupBox.Location = new Point(562, 164);
             configgroupBox.Name = "configgroupBox";
             configgroupBox.Size = new Size(364, 237);
             configgroupBox.TabIndex = 41;
             configgroupBox.TabStop = false;
             configgroupBox.Text = "Configuration";
             configgroupBox.Visible = false;
+            // 
+            // prefcheckBox
+            // 
+            prefcheckBox.AutoSize = true;
+            prefcheckBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            prefcheckBox.Location = new Point(34, 104);
+            prefcheckBox.Name = "prefcheckBox";
+            prefcheckBox.Size = new Size(299, 17);
+            prefcheckBox.TabIndex = 5;
+            prefcheckBox.Text = "Use this call instead of the one from WSPR Scheduler";
+            prefcheckBox.UseVisualStyleBackColor = true;
             // 
             // label13
             // 
@@ -625,23 +637,12 @@
             label12.TabIndex = 0;
             label12.Text = "Own callsign:";
             // 
-            // prefcheckBox
-            // 
-            prefcheckBox.AutoSize = true;
-            prefcheckBox.Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            prefcheckBox.Location = new Point(34, 104);
-            prefcheckBox.Name = "prefcheckBox";
-            prefcheckBox.Size = new Size(299, 17);
-            prefcheckBox.TabIndex = 5;
-            prefcheckBox.Text = "Use this call instead of the one from WSPR Scheduler";
-            prefcheckBox.UseVisualStyleBackColor = true;
-            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(1176, 604);
+            AutoScroll = true;
+            ClientSize = new Size(1137, 604);
             Controls.Add(configgroupBox);
             Controls.Add(configbutton);
             Controls.Add(label11);

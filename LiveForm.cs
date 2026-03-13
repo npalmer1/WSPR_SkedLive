@@ -91,7 +91,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.15";
+            vers = "0.1.16";
 
             if (!checkDB("wspr_rx"))
             {
@@ -158,6 +158,9 @@ namespace WSPR_Live
             dataGridView1.Columns[3].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dataGridView1.Columns[4].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dataGridView1.Columns[6].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+
 
 
             dateTimePicker1.Format = DateTimePickerFormat.Custom;
