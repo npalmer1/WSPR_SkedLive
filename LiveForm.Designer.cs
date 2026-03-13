@@ -88,8 +88,11 @@
             savebutton = new Button();
             owncalltextBox = new TextBox();
             label12 = new Label();
+            panel1 = new Panel();
+            Waitlabel = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             configgroupBox.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // testDBbutton
@@ -637,12 +640,32 @@
             label12.TabIndex = 0;
             label12.Text = "Own callsign:";
             // 
+            // panel1
+            // 
+            panel1.BackColor = Color.SeaShell;
+            panel1.Controls.Add(Waitlabel);
+            panel1.Location = new Point(242, 212);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(302, 120);
+            panel1.TabIndex = 42;
+            panel1.VisibleChanged += panel1_VisibleChanged;
+            // 
+            // Waitlabel
+            // 
+            Waitlabel.AutoSize = true;
+            Waitlabel.Location = new Point(49, 56);
+            Waitlabel.Name = "Waitlabel";
+            Waitlabel.Size = new Size(177, 15);
+            Waitlabel.TabIndex = 0;
+            Waitlabel.Text = "Retriveing live data ...please wait";
+            // 
             // LiveForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             ClientSize = new Size(1137, 604);
+            Controls.Add(panel1);
             Controls.Add(configgroupBox);
             Controls.Add(configbutton);
             Controls.Add(label11);
@@ -686,6 +709,8 @@
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             configgroupBox.ResumeLayout(false);
             configgroupBox.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -751,5 +776,7 @@
         private Label label12;
         private Label label13;
         private CheckBox prefcheckBox;
+        private Panel panel1;
+        private Label Waitlabel;
     }
 }

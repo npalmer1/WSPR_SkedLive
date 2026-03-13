@@ -146,7 +146,7 @@ namespace WSPR_Live
                 _ =  get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
             });*/
 
-           await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
+            await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
 
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
@@ -293,10 +293,10 @@ namespace WSPR_Live
                                 }
                             }
                             else
-                            { 
-                                Msg.TMessageBox("No callsign configured - see Config", "Callsign configuration",3000);
-                                
-                              
+                            {
+                                Msg.TMessageBox("No callsign configured - see Config", "Callsign configuration", 3000);
+
+
                             }
 
                         }
@@ -314,7 +314,7 @@ namespace WSPR_Live
                     }
                 }
             }
-           
+
 
         }
 
@@ -343,7 +343,7 @@ namespace WSPR_Live
                             call = reader.ReadLine();
                             pref = reader.ReadLine();
                             reader.Close();
-                           
+
                         }
                         if (call != null && call != "")
                         {
@@ -371,7 +371,7 @@ namespace WSPR_Live
                             {
                                 prefcheckBox.Checked = false;
                             }
-                        }   
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -381,7 +381,7 @@ namespace WSPR_Live
                 }
                 else
                 {
-                   // Msg.TMessageBox("No callsign file saved", "Callsign", 2000);
+                    // Msg.TMessageBox("No callsign file saved", "Callsign", 2000);
                     return ok;
                 }
             }
@@ -451,17 +451,15 @@ namespace WSPR_Live
             if (change)
             {
                 int min = 30;
-                string cwssbpwr = "100";
-                if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
 
                 /*await Task.Run(() =>
                 {
                     get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
                 });*/
-                await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
+                await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
             }
         }
-        
+
 
         private void clearRX()
         {
@@ -551,7 +549,8 @@ namespace WSPR_Live
         {
             string cwssbpwr = "100";
             //MessageForm nForm = new MessageForm();
-            Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
+            //Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
+            panel1.Visible = true;
             if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
             /*await Task.Run(() =>
             {
@@ -603,13 +602,16 @@ namespace WSPR_Live
             }
             return false;
         }
-        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan, bool owncall, string cwssbpwr)
+        public async Task get_results(string call, string freq, string server, string db_user, string db_pass, int timespan, bool owncall)
         {
             //note: band not currently used
 
             bool isUnlocked = false;
             bool found = false;
             int tries = 0;
+
+            string cwssbpwr = "100";
+            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
             if (updatecheckBox.Checked)
             {
                 Msg.TMessageBox("Updates disabled", "", 2000);
@@ -651,7 +653,8 @@ namespace WSPR_Live
 
                     int pwrW = 100;
                     int dBm = 50;
-                   
+                    try
+                    {
                         if (int.TryParse(cwssbpwr, out pwrW))
                         {
                             pwrW = pwrW;
@@ -660,18 +663,19 @@ namespace WSPR_Live
                         {
                             pwrW = 100;
                         }
-                   
-                    dBm = convertTodBm(pwrW);
+                        dBm = convertTodBm(pwrW);
+                    }
+                    catch { }
 
                     while ((line = reader.ReadLine()) != null)
                     {
 
                         if (line != null && line != "")
                         {
-                           
+
                             if (!found)
                             {
-                                if (tries == 0) { Msg.TMessageBox("Please wait - retrieving data ....", "", 30000); }
+                                if (tries == 0) { panel1.Visible = true; }//Msg.TMessageBox("Please wait - retrieving data ....", "", 30000); }
                                 if (!owncall)
                                 {
                                     dataGridView1.Rows.Clear();
@@ -697,16 +701,18 @@ namespace WSPR_Live
                         }
 
                     }
-                   if (!found)
+                    if (!found)
                     {
                         isUnlocked = true;
-                        Msg.TMessageBox("Unable to find call "+call+" in live data", "Call", 2500);
+                        Msg.TMessageBox("Unable to find live data for this time period", "Data for call: " + call, 4000);
                         dataGridView1.Rows.Clear();
                         isUnlocked = true;
+                        panel1.Visible = false;
+                        Waitlabel.Text = "Retrieving live data ... please wait";
                         return;
                     }
 
-                        isUnlocked = true;
+                    isUnlocked = true;
 
 
                     await Task.Delay(1000);
@@ -738,6 +744,7 @@ namespace WSPR_Live
                 Thread.Sleep(800);
                 tries++;
             }
+            panel1.Visible = false;
 
             //nForm.Dispose();
 
@@ -777,6 +784,7 @@ namespace WSPR_Live
             {
 
             }
+            panel1.Visible = false;
 
         }
 
@@ -1590,11 +1598,11 @@ namespace WSPR_Live
 
         private async void Nowbutton_Click(object sender, EventArgs e)
         {
-            await Task.Run(() =>
+            /*await Task.Run(() =>
             {
                 Nowbutton_Action();
-            });
-            //await Nowbutton_Action();
+            });*/
+            await Nowbutton_Action();
         }
         private async Task Nowbutton_Action()
         {
@@ -1602,6 +1610,7 @@ namespace WSPR_Live
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
             min = findPeriod();
+            panel1.Visible = true;
             await updateNow(min, true);
         }
         private async Task updateNow(int min, bool wait)
@@ -1629,9 +1638,8 @@ namespace WSPR_Live
                 string freq = "";
                 if (!timer1.Enabled)
                 {
-                    string cwssbpwr = "100";
-                    if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
-                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall,cwssbpwr);
+
+                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
 
                     PlistBox.SelectedIndex = 0;
@@ -1756,14 +1764,13 @@ namespace WSPR_Live
                 //getCall();
                 if (startCount > startCountMax)  //X minutes
                 {
-                    string cwssbpwr = "100";
-                    if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+
                     startCount = 0;
-                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall,cwssbpwr);
+                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
                 }
 
-               
+
             }
             catch { }
 
@@ -1908,17 +1915,26 @@ namespace WSPR_Live
                     prefcheckBox.Checked = false;
                     saveCall(false);
                 }
- 
+
             }
             else
             {
                 saveCall(false);
-            }              
+            }
         }
 
         private void cancelbutton_Click(object sender, EventArgs e)
         {
             configgroupBox.Visible = false;
+        }
+
+        private void panel1_VisibleChanged(object sender, EventArgs e)
+        {
+            panel1.BringToFront();
+            Waitlabel.Visible = true;
+            Waitlabel.Text = "Retrieving local data ... please wait";
+            Waitlabel.BringToFront();
+            Waitlabel.Refresh();
         }
     }
 }
