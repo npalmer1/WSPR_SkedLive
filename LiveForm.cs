@@ -548,6 +548,7 @@ namespace WSPR_Live
         private async void updateResults()
         {
             string cwssbpwr = "100";
+            Waitlabel.Text = "Retrieving local data ... please wait";
             //MessageForm nForm = new MessageForm();
             //Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
             panel1.Visible = true;
@@ -1932,7 +1933,7 @@ namespace WSPR_Live
         {
             panel1.BringToFront();
             Waitlabel.Visible = true;
-            Waitlabel.Text = "Retrieving local data ... please wait";
+           
             Waitlabel.BringToFront();
             Waitlabel.Refresh();
         }
