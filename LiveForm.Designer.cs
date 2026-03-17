@@ -286,7 +286,7 @@
             // 
             // timer1
             // 
-            timer1.Interval = 120000;
+            timer1.Interval = 60000;
             timer1.Tick += timer1_Tick;
             // 
             // dataGridView1
@@ -456,7 +456,7 @@
             // timer2
             // 
             timer2.Enabled = true;
-            timer2.Interval = 60000;
+            timer2.Interval = 300000;
             timer2.Tick += timer2_Tick;
             // 
             // updatecheckBox

@@ -91,7 +91,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.16";
+            vers = "0.1.17";
 
             if (!checkDB("wspr_rx"))
             {
@@ -147,6 +147,8 @@ namespace WSPR_Live
             });*/
 
             await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
+           await Task.Delay(2000);
+            show_results();
 
         }
         public void set_header(string call, string serverName, string db_user, string db_pass)
@@ -457,6 +459,8 @@ namespace WSPR_Live
                     get_results(Callsign, "", db_server, db_user, db_pass, min, owncall, cwssbpwr);
                 });*/
                 await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
+                await Task.Delay(2000);
+                show_results();
             }
         }
 
@@ -547,18 +551,18 @@ namespace WSPR_Live
         }
         private async void updateResults()
         {
-            string cwssbpwr = "100";
+          
             Waitlabel.Text = "Retrieving local data ... please wait";
             //MessageForm nForm = new MessageForm();
             //Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
             panel1.Visible = true;
-            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+           
             /*await Task.Run(() =>
             {
                 _ = show_results(cwssbpwr);
             });*/
 
-            await show_results(cwssbpwr);
+            await show_results();
             //nForm.Dispose();
         }
 
@@ -610,7 +614,7 @@ namespace WSPR_Live
             bool isUnlocked = false;
             bool found = false;
             int tries = 0;
-
+            timespan = 5;
             string cwssbpwr = "100";
             if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
             if (updatecheckBox.Checked)
@@ -708,24 +712,24 @@ namespace WSPR_Live
                         Msg.TMessageBox("Unable to find live data for this time period", "Data for call: " + call, 4000);
                         dataGridView1.Rows.Clear();
                         isUnlocked = true;
-                        panel1.Visible = false;
-                        Waitlabel.Text = "Retrieving live data ... please wait";
+                        
+                        Waitlabel.Text = "Retrieving LOCAL data ... please wait";
                         return;
                     }
 
                     isUnlocked = true;
 
 
-                    await Task.Delay(1000);
+                    //await Task.Delay(1000);
 
-                    if (owncall)
+                    /*if (owncall)
                     {
                         await show_results(cwssbpwr);
                     }
                     else
                     {
                         dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
-                    }
+                    }*/
 
                 }
                 catch
@@ -745,7 +749,7 @@ namespace WSPR_Live
                 Thread.Sleep(800);
                 tries++;
             }
-            panel1.Visible = false;
+           
 
             //nForm.Dispose();
 
@@ -767,12 +771,27 @@ namespace WSPR_Live
         }
 
 
-        private async Task show_results(string cwssbpwr) // read back from the reported table to populate the datagridview
+        private async Task show_results() // read back from the reported table to populate the datagridview
         {
             try
             {
-
-
+                string cwssbpwr = "100";
+                if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+                int pwrW = 100;
+                int dBm = 50;
+                try
+                {
+                    if (int.TryParse(cwssbpwr, out pwrW))
+                    {
+                        pwrW = pwrW;
+                    }
+                    else
+                    {
+                        pwrW = 100;
+                    }
+                    dBm = convertTodBm(pwrW);
+                }
+                catch { }
                 int rows = table_count();
                 if (rows > 0)
                 {
@@ -786,6 +805,7 @@ namespace WSPR_Live
 
             }
             panel1.Visible = false;
+            Waitlabel.Text = "Retrieving live data ... please wait";
 
         }
 
@@ -1446,9 +1466,9 @@ namespace WSPR_Live
         private async void filterbutton_Click(object sender, EventArgs e)
         {
             //MessageForm nForm = new MessageForm();
-            string cwssbpwr = "100";
+          
             Msg.TMessageBox("Please wait ....", "", 30000);
-            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
+          
             if (filterbutton.Text == "Apply")
             {
                 filter_results(false, "");
@@ -1456,7 +1476,7 @@ namespace WSPR_Live
             }
             else
             {
-                await show_results(cwssbpwr);
+                await show_results();
                 // filterbutton.Text = "Apply";
             }
             //nForm.Dispose();
@@ -1465,10 +1485,10 @@ namespace WSPR_Live
         private async void Clearbutton_Click(object sender, EventArgs e)
         {
             //MessageForm nForm = new MessageForm();
-            string cwssbpwr = "100";
+           
             Msg.TMessageBox("Please wait ....", "", 30000);
-            if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
-            await show_results(cwssbpwr);
+           
+            await show_results();
 
             //nForm.Dispose();
         }
@@ -1616,6 +1636,7 @@ namespace WSPR_Live
         }
         private async Task updateNow(int min, bool wait)
         {
+            bool ok = false;
             if (updatecheckBox.Checked)
             {
                 Msg.TMessageBox("Updates disabled", "", 2000);
@@ -1644,15 +1665,34 @@ namespace WSPR_Live
 
 
                     PlistBox.SelectedIndex = 0;
+                    ok = true;
                 }
                 else
                 {
+                    ok = false;
+                  
+                }
 
+                if ((!ok && dataGridView1.Rows.Count < 2) || ok)
+                {
+                    await Task.Delay(2000);
+                    if (owncall)
+                    {
+                        await show_results();
+                    }
+                    else
+                    {
+                        dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+                    }
+                }
+                if (!ok)
+                {
                     return;
                 }
+               
                 if (wait && !timer1.Enabled)
                 {
-                    timer1.Interval = 120000;
+                    timer1.Interval = 60000;
                     timer1.Enabled = true;
                     timer1.Start(); //prevent multiple presses within 2 minutes
                     Nowbutton.Text = "Wait ...";
@@ -1770,6 +1810,8 @@ namespace WSPR_Live
                     await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
                 }
+                await Task.Delay(2000);
+                show_results();
 
 
             }
