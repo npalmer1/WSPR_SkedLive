@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
@@ -655,7 +656,7 @@ namespace WSPR_Live
                     using var reader = new StreamReader(stream);
 
                     string line = "";
-
+                   
                     int pwrW = 100;
                     int dBm = 50;
                     try
@@ -709,7 +710,7 @@ namespace WSPR_Live
                     if (!found)
                     {
                         isUnlocked = true;
-                        Msg.TMessageBox("Unable to find live data for this time period", "Data for call: " + call, 4000);
+                        Msg.TMessageBox("Unable to find live reports for last " + timespan + " mins",  "Data for call "+call, 5000);
                         dataGridView1.Rows.Clear();
                         isUnlocked = true;
                         
