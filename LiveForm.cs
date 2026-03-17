@@ -614,7 +614,7 @@ namespace WSPR_Live
             bool isUnlocked = false;
             bool found = false;
             int tries = 0;
-            timespan = 5;
+           
             string cwssbpwr = "100";
             if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
             if (updatecheckBox.Checked)
