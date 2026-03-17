@@ -1782,7 +1782,7 @@ namespace WSPR_Live
         private void timer2_Tick(object sender, EventArgs e)
         {
             try
-            {
+            {               
                 updatePassandCall();
             }
             catch
@@ -1796,7 +1796,7 @@ namespace WSPR_Live
             {
                 string freq = "";
                 startCount++;
-                startCountMax = 4;
+                startCountMax = 4;      //timer tick every minute - so act after 4 mins
                 int min = 20;
                 int index = PlistBox.TopIndex;
                 string text = PlistBox.Items[index].ToString();
@@ -1810,9 +1810,10 @@ namespace WSPR_Live
                     startCount = 0;
                     await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
 
+
+                    await Task.Delay(2000);
+                    show_results();
                 }
-                await Task.Delay(2000);
-                show_results();
 
 
             }
