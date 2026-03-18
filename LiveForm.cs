@@ -92,13 +92,16 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.17";
+            vers = "0.1.18";
 
+            panel1.Left = (this.ClientSize.Width - panel1.Width) / 2;
+            panel1.Top = (this.ClientSize.Height - panel1.Height) / 2;
             if (!checkDB("wspr_rx"))
             {
                 Msg.TMessageBox("Unable to connect to database", "Database connection error", 3000);
                 return;
             }
+            EnsureIndexes();
 
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
@@ -173,6 +176,61 @@ namespace WSPR_Live
             //dateTimePicker1.ShowUpDown = true;
             bandlistBox.SelectedIndex = 0;
 
+        }
+
+        private void EnsureIndexes()
+        {
+            try
+            {
+                string cs = "server=" + db_server + ";user id=" + db_user +
+                            ";password=" + db_pass + ";database=wspr_rx";
+                using (var con = new MySqlConnection(cs))
+                {
+                    con.Open();
+
+                    // Check table exists
+                    using (var cmd = new MySqlCommand(
+                        "SELECT COUNT(*) FROM information_schema.tables " +
+                        "WHERE table_schema = 'wspr_rx' AND table_name = 'reported'", con))
+                    {
+                        if (Convert.ToInt32(cmd.ExecuteScalar()) == 0) return;
+                    }
+
+                    // Get all existing indexes on reported in one query
+                    var existingIndexes = new HashSet<string>();
+                    using (var cmd = new MySqlCommand(
+                        "SELECT index_name FROM information_schema.statistics " +
+                        "WHERE table_schema = 'wspr_rx' AND table_name = 'reported'", con))
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            existingIndexes.Add(reader.GetString(0).ToLower());
+
+                    // Only create indexes that don't already exist
+                    var indexes = new[]
+                    {
+                ("idx_reported_time",      "ON reported (time)"),
+                ("idx_reported_band",      "ON reported (band)"),
+                ("idx_reported_time_band", "ON reported (time, band)"),
+                ("idx_reported_rx_sign",   "ON reported (rx_sign)"),
+                ("idx_reported_distance",  "ON reported (distance)"),
+                ("idx_reported_version",   "ON reported (version)")
+            };
+
+                    foreach (var (name, definition) in indexes)
+                    {
+                        if (!existingIndexes.Contains(name.ToLower()))
+                        {
+                            using (var cmd = new MySqlCommand(
+                                $"CREATE INDEX {name} {definition}", con))
+                            {
+                                cmd.CommandTimeout = 300; // 5 mins for large tables
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
         }
 
         private bool checkDB(string db)
@@ -803,7 +861,7 @@ namespace WSPR_Live
             }
             catch
             {
-
+                panel1.Visible = false;
             }
             panel1.Visible = false;
             Waitlabel.Text = "Retrieving live data ... please wait";
@@ -1085,6 +1143,7 @@ namespace WSPR_Live
             }
 
             dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
+            panel1.Visible = false;
         }
 
 
@@ -1168,7 +1227,7 @@ namespace WSPR_Live
                 cells[i] = "";
             }
         }
-        private bool find_selected(string time1, string time2, int band, int tablecount, bool version, string ver) //find a slot row for display in grid from the database corresponding to the date/time from the slot
+        /*private bool find_selected(string time1, string time2, int band, int tablecount, bool version, string ver) //find a slot row for display in grid from the database corresponding to the date/time from the slot
         {
             DataTable Slots = new DataTable();
             //DateTime d = new DateTime();
@@ -1191,16 +1250,15 @@ namespace WSPR_Live
             string callstr = "";
             string fromstr = "";
             string tostr = "";
+            string C = "";
             if (!databaseError)
             {
 
-                MySqlConnection connection = new MySqlConnection(myConnectionString);
+                // MySqlConnection connection = new MySqlConnection(myConnectionString);
 
 
-                connection.Open();
 
-                MySqlCommand command = connection.CreateCommand();
-
+                MySqlDataReader Reader = null;
                 try
                 {
                     if (callFiltertextBox.Text.Trim() != "")
@@ -1238,32 +1296,40 @@ namespace WSPR_Live
                     //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
                     if (version)
                     {
-                        command.CommandText = "SELECT * FROM reported WHERE version = '" + ver + "'";
+                        C = "SELECT * FROM reported WHERE version = '" + ver + "'";
                     }
                     else if (datecheckBox.Checked)
                     {
-                        command.CommandText = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+                        C = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
                     }
                     else
                     {
-                        command.CommandText = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+                        C = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+                    }
+
+                    using (var connection = new MySqlConnection(myConnectionString))
+                    {
+
+                        connection.Open();
+
+                        MySqlCommand command = connection.CreateCommand();
+                        command.CommandTimeout = 60; // seconds
+                        try
+                        {
+                            Reader = command.ExecuteReader();
+                        }
+                        catch
+                        {
+                            Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
+                            return false;
+                        }
                     }
                 }
                 catch
                 {
 
                 }
-                MySqlDataReader Reader;
-                command.CommandTimeout = 60; // seconds
-                try
-                {
-                    Reader = command.ExecuteReader();
-                }
-                catch
-                {
-                    Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
-                    return false;
-                }
+                               
 
                 int pwrW = 100;
                 int dBm = 50;
@@ -1286,8 +1352,7 @@ namespace WSPR_Live
                 }
                 dBm = convertTodBm(pwrW);
 
-                Monitor.Enter(_lock);
-                {
+                
                     try
                     {
                         while (Reader.Read())
@@ -1363,7 +1428,7 @@ namespace WSPR_Live
 
                         }
                         Reader.Close();
-                        connection.Close();
+                        //connection.Close();
                         databaseError = false;
 
 
@@ -1373,7 +1438,7 @@ namespace WSPR_Live
 
                         //databaseError = true; //stop wasting time trying to connect if database error - ignore for present
                         found = false;
-                        connection.Close();
+                        //connection.Close();
 
                     }
                     finally
@@ -1381,10 +1446,238 @@ namespace WSPR_Live
                         Monitor.Exit(_lock); // always releases the lock }
 
                     }
-                }
+                
             }
             return found;
+        }*/
+
+        private bool find_selected(string time1, string time2, int band, int tablecount, bool version, string ver)
+        {
+            if (databaseError) return false;
+
+            // ── Build filters before touching the database ────────────────────────
+            string q = (band == -2) ? ">=" : "=";
+            string bandstr = (band == -2) ? "-1" : band.ToString();
+
+            string callFilter = callFiltertextBox.Text.Trim().Replace("*", "");
+            string callstr = "";
+            string fromstr = "";
+            string tostr = "";
+            double fromKm = 0;
+            double toKm = double.MaxValue;
+             int pwrW = 100;
+            int dBm = 50;
+            string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
+            if (CWSSBlistBox.SelectedIndex > -1)
+            {
+                if (int.TryParse(cwssbpwr, out pwrW))
+                {
+                    pwrW = pwrW;
+                }
+                else
+                {
+                    pwrW = 100;
+                }
+
+            }
+            else
+            {
+                pwrW = 100;
+            }
+            dBm = convertTodBm(pwrW);
+
+            /* if (double.TryParse(DFromtextBox.Text.Trim(), out double fromVal) && fromVal > 0)
+                 fromKm = kmcheckBox.Checked ? fromVal : fromVal * 1.609;
+
+             if (double.TryParse(DTotextBox.Text.Trim(), out double toVal) && toVal > 0)
+                 toKm = kmcheckBox.Checked ? toVal : toVal * 1.609;
+
+             // ── Build power display values ────────────────────────────────────────
+             int pwrW = 100;
+             if (CWSSBlistBox.SelectedIndex > -1)
+                 int.TryParse(CWSSBlistBox.SelectedItem.ToString(), out pwrW);
+             int dBm = convertTodBm(pwrW);*/
+            if (callFiltertextBox.Text.Trim() != "")
+            {
+                if (callFiltertextBox.Text.Contains("*"))
+                {
+                    callFiltertextBox.Text = callFiltertextBox.Text.Replace("*", "");
+                }
+                callstr = " AND rx_sign LIKE '" + callFiltertextBox.Text.Trim() + "%' ";
+            }
+            fromstr = DFromtextBox.Text.Trim();
+            tostr = DTotextBox.Text.Trim();
+            if (fromstr != "")
+            {
+                if (!kmcheckBox.Checked)
+                {
+                    Double k = Convert.ToInt32(fromstr);
+                    k = k * 1.609;
+                    int K = (int)k;
+                    fromstr = K.ToString();
+                }
+                fromstr = " AND distance >= " + fromstr + " ";
+            }
+            if (tostr != "")
+            {
+                if (!kmcheckBox.Checked)
+                {
+                    Double k = Convert.ToInt32(tostr);
+                    k = k * 1.609;
+                    int K = (int)k;
+                    tostr = K.ToString();
+                }
+                tostr = " AND distance <= " + tostr + " ";
+            }
+
+            // ── Build SQL ─────────────────────────────────────────────────────────
+            clearRX();
+            string C;
+            C = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
+            if (version)
+            {
+                C = "SELECT * FROM reported WHERE version = '" + ver + "'";
+            }
+            else if (datecheckBox.Checked)
+            {
+                C = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+            }
+            else
+            {
+                C = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
+            }
+            /*if (version)
+            {
+                sql = "SELECT * FROM reported WHERE version = @ver";
+            }
+            else if (datecheckBox.Checked)
+            {
+                sql = "SELECT * FROM reported " +
+                      "WHERE time >= @time1 AND time <= @time2 " +
+                      "AND band " + q + " @band " +
+                      "AND distance >= @fromKm AND distance <= @toKm ";
+                if (!string.IsNullOrEmpty(callFilter))
+                    sql += "AND rx_sign LIKE @call ";
+                sql += "ORDER BY time DESC LIMIT @maxrows";
+            }
+            else
+            {
+                sql = "SELECT * FROM reported " +
+                      "WHERE band " + q + " @band " +
+                      "AND distance >= @fromKm AND distance <= @toKm ";
+                if (!string.IsNullOrEmpty(callFilter))
+                    sql += "AND rx_sign LIKE @call ";
+                sql += "ORDER BY time DESC LIMIT @maxrows";
+            }*/
+
+            // ── Query database ────────────────────────────────────────────────────
+            bool found = false;
+            int i = 0;
+            string myConnectionString = "server=" + db_server + ";user id=" + db_user +
+                                        ";password=" + db_pass + ";database=wspr_rx" +
+                                        ";Pooling=true";
+            try
+            {
+                using (var connection = new MySqlConnection(myConnectionString))
+                {
+                    connection.Open();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = C;
+                        command.CommandTimeout = 60;
+
+                        command.Parameters.AddWithValue("@ver", ver ?? "");
+                        command.Parameters.AddWithValue("@time1", time1);
+                        command.Parameters.AddWithValue("@time2", time2);
+                        command.Parameters.AddWithValue("@band", bandstr);
+                        command.Parameters.AddWithValue("@fromKm", fromKm);
+                        command.Parameters.AddWithValue("@toKm", toKm);
+                        command.Parameters.AddWithValue("@call", callFilter + "%");
+                        command.Parameters.AddWithValue("@maxrows", maxrows);
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                if (i >= maxrows || i >= tablecount) break;
+
+                                // ── Read row ──────────────────────────────────────
+                                string rx_sign = "";
+                                DateTime time = DateTime.MinValue;
+                                try
+                                {
+                                    rx_sign = (string)reader["rx_sign"];
+                                    time = (DateTime)reader["time"];
+                                    RX.time = time;
+                                    RX.band = (Int16)reader["band"];
+                                    RX.rx_sign = rx_sign;
+                                    RX.rx_loc = (string)reader["rx_loc"];
+                                    RX.tx_sign = (string)reader["tx_sign"];
+                                    RX.tx_loc = (string)reader["tx_loc"];
+                                    RX.distance = (int)reader["distance"];
+                                    RX.azimuth = (int)reader["azimuth"];
+                                    RX.frequency = (int)reader["frequency"];
+                                    RX.power = (Int16)reader["power"];
+                                    RX.snr = (Int16)reader["snr"];
+                                    RX.drift = (Int16)reader["drift"];
+                                    RX.version = (string)reader["version"];
+                                    found = true;
+                                }
+                                catch { continue; }  // skip malformed rows
+
+                                // ── Update grid ───────────────────────────────────
+                                if (!string.IsNullOrEmpty(rx_sign))
+                                {
+                                    
+                                    clearcells();
+
+                                    double freqMhz = RX.frequency / 1000000.0;
+                                    string snrStr = RX.snr > 0
+                                                     ? "+" + RX.snr
+                                                     : RX.snr.ToString();
+
+                                    cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm");
+                                    cells[1] = RX.tx_sign;
+                                    cells[2] = freqMhz.ToString("F6");
+                                    cells[3] = snrStr;
+                                    cells[4] = RX.drift.ToString();
+                                    cells[5] = RX.tx_loc;
+                                    cells[6] = RX.power.ToString();
+                                    cells[7] = RX.rx_sign;
+                                    cells[8] = RX.rx_loc;
+                                    cells[9] = RX.distance.ToString();
+                                    cells[10] = convert_to_miles(RX.distance);
+                                    cells[11] = RX.azimuth.ToString();
+                                    cells[12] = getCW(RX.snr, RX.power, dBm);
+                                    cells[13] = getSSB(RX.snr, RX.power, dBm);
+                                    cells[14] = RX.version;
+
+                                    update_grid();
+                                }
+                                i++;
+                            }
+                        } // reader closed
+                    }     // command disposed
+                }         // connection closed
+                databaseError = false;
+            }
+            catch (MySqlException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DB error {ex.Number}: {ex.Message}");
+                Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
+                databaseError = false;  // allow retry
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error: {ex.Message}");
+                return false;
+            }
+
+            return found;
         }
+
+
         private void update_grid() //add rows to the datagridview
         {
 
@@ -1467,9 +1760,11 @@ namespace WSPR_Live
         private async void filterbutton_Click(object sender, EventArgs e)
         {
             //MessageForm nForm = new MessageForm();
-          
-            Msg.TMessageBox("Please wait ....", "", 30000);
-          
+
+            //Msg.TMessageBox("Please wait ....", "", 30000);
+            panel1.Visible = true;
+            panel1.Refresh();
+
             if (filterbutton.Text == "Apply")
             {
                 filter_results(false, "");
@@ -1486,8 +1781,10 @@ namespace WSPR_Live
         private async void Clearbutton_Click(object sender, EventArgs e)
         {
             //MessageForm nForm = new MessageForm();
-           
-            Msg.TMessageBox("Please wait ....", "", 30000);
+
+            //Msg.TMessageBox("Please wait ....", "", 30000);
+            Waitlabel.Text = "Please wait ...";
+            panel1.Visible = true;
            
             await show_results();
 
