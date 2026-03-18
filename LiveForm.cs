@@ -55,7 +55,7 @@ namespace WSPR_Live
 
         int timespan = 10; //timespan x minutes
         int liveLimit = 1000;
-        int maxrows = 2500;
+        int maxrows = 5000;
         bool update = false;
         string dateformat = "yyyy-MM-dd";
 
@@ -92,7 +92,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.18";
+            vers = "0.1.17";
 
             panel1.Left = (this.ClientSize.Width - panel1.Width) / 2;
             panel1.Top = (this.ClientSize.Height - panel1.Height) / 2;
