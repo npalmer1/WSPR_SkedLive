@@ -1929,8 +1929,7 @@ namespace WSPR_Live
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
             min = findPeriod();
-            Waitlabel.Text = "Retrieving live data ... please wait";
-            panel1.Visible = true;
+          
             await updateNow(min, true);
         }
         private async Task updateNow(int min, bool wait)
@@ -1941,6 +1940,8 @@ namespace WSPR_Live
                 Msg.TMessageBox("Updates disabled", "", 2000);
                 return;
             }
+            Waitlabel.Text = "Retrieving live data ... please wait";
+            panel1.Visible = true;
             try
             {
 
