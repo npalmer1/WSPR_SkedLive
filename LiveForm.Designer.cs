@@ -480,6 +480,7 @@
             calltextBox.Size = new Size(113, 22);
             calltextBox.TabIndex = 32;
             calltextBox.TextChanged += calltextBox_TextChanged;
+            calltextBox.KeyDown += calltextBox_KeyDown;
             // 
             // othercheckBox
             // 

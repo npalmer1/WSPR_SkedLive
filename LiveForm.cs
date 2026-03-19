@@ -151,7 +151,7 @@ namespace WSPR_Live
             });*/
 
             await get_results(Callsign, "", db_server, db_user, db_pass, min, owncall);
-           await Task.Delay(2000);
+            await Task.Delay(2000);
             show_results();
 
         }
@@ -610,12 +610,12 @@ namespace WSPR_Live
         }
         private async void updateResults()
         {
-          
+
             Waitlabel.Text = "Retrieving local data ... please wait";
             //MessageForm nForm = new MessageForm();
             //Msg.TMessageBox("Please wait - retrieving local data ....", "", 30000);
             panel1.Visible = true;
-           
+
             /*await Task.Run(() =>
             {
                 _ = show_results(cwssbpwr);
@@ -673,7 +673,7 @@ namespace WSPR_Live
             bool isUnlocked = false;
             bool found = false;
             int tries = 0;
-           
+
             string cwssbpwr = "100";
             if (CWSSBlistBox.SelectedIndex > -1) { cwssbpwr = CWSSBlistBox.SelectedItem.ToString(); }
             if (updatecheckBox.Checked)
@@ -714,7 +714,7 @@ namespace WSPR_Live
                     using var reader = new StreamReader(stream);
 
                     string line = "";
-                   
+
                     int pwrW = 100;
                     int dBm = 50;
                     try
@@ -768,11 +768,11 @@ namespace WSPR_Live
                     if (!found)
                     {
                         isUnlocked = true;
-                        Msg.TMessageBox("Unable to find live reports for last " + timespan + " mins",  "Data for call "+call, 5000);
+                        Msg.TMessageBox("Unable to find live reports for last " + timespan + " mins", "Data for call " + call, 5000);
                         dataGridView1.Rows.Clear();
                         isUnlocked = true;
-                        
-                        Waitlabel.Text = "Retrieving LOCAL data ... please wait";
+
+                        if (!othercheckBox.Checked) { Waitlabel.Text = "Retrieving LOCAL data ... please wait"; }
                         return;
                     }
 
@@ -808,7 +808,7 @@ namespace WSPR_Live
                 Thread.Sleep(800);
                 tries++;
             }
-           
+
 
             //nForm.Dispose();
 
@@ -1465,7 +1465,7 @@ namespace WSPR_Live
             string tostr = "";
             double fromKm = 0;
             double toKm = double.MaxValue;
-             int pwrW = 100;
+            int pwrW = 100;
             int dBm = 50;
             string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
             if (CWSSBlistBox.SelectedIndex > -1)
@@ -1628,7 +1628,7 @@ namespace WSPR_Live
                                 // ── Update grid ───────────────────────────────────
                                 if (!string.IsNullOrEmpty(rx_sign))
                                 {
-                                    
+
                                     clearcells();
 
                                     double freqMhz = RX.frequency / 1000000.0;
@@ -1785,7 +1785,7 @@ namespace WSPR_Live
             //Msg.TMessageBox("Please wait ....", "", 30000);
             Waitlabel.Text = "Please wait ...";
             panel1.Visible = true;
-           
+
             await show_results();
 
             //nForm.Dispose();
@@ -1929,6 +1929,7 @@ namespace WSPR_Live
             int index = PlistBox.TopIndex;
             string text = PlistBox.Items[index].ToString();
             min = findPeriod();
+            Waitlabel.Text = "Retrieving live data ... please wait";
             panel1.Visible = true;
             await updateNow(min, true);
         }
@@ -1968,7 +1969,7 @@ namespace WSPR_Live
                 else
                 {
                     ok = false;
-                  
+
                 }
 
                 if ((!ok && dataGridView1.Rows.Count < 2) || ok)
@@ -1987,7 +1988,7 @@ namespace WSPR_Live
                 {
                     return;
                 }
-               
+
                 if (wait && !timer1.Enabled)
                 {
                     timer1.Interval = 60000;
@@ -1995,11 +1996,13 @@ namespace WSPR_Live
                     timer1.Start(); //prevent multiple presses within 2 minutes
                     Nowbutton.Text = "Wait ...";
                 }
+               
             }
             catch
             {
 
             }
+            panel1.Visible = false;
         }
 
         private int findPeriod() //find period in minutes
@@ -2079,7 +2082,7 @@ namespace WSPR_Live
         private void timer2_Tick(object sender, EventArgs e)
         {
             try
-            {               
+            {
                 updatePassandCall();
             }
             catch
@@ -2134,10 +2137,12 @@ namespace WSPR_Live
                 Callsign = calltextBox.Text.Trim().ToUpper();
             }
             this.Text = headerline.Replace(originalcall, Callsign);
+
         }
 
         private void othercheckBox_CheckedChanged(object sender, EventArgs e)
         {
+            Waitlabel.Text = "Retrieving live data ... please wait";
             if (othercheckBox.Checked)
             {
                 calltextBox.Enabled = true;
@@ -2149,7 +2154,10 @@ namespace WSPR_Live
                 {
                     Callsign = calltextBox.Text.ToUpper();
                     this.Text = headerline.Replace(originalcall, Callsign);
+                    Nowbutton_Action();
+                   
                 }
+               
             }
             else
             {
@@ -2160,10 +2168,14 @@ namespace WSPR_Live
                 filterbutton.Visible = true;
                 Clearbutton.Visible = true;
                 this.Text = headerline.Replace(originalcall, Callsign);
-                Nowbutton.Text = "Update now";
-                timer1.Stop();
-                timer1.Enabled = false;
+                Nowbutton.Text = "Update now";               
+                panel1.Visible = true;
+                panel1.Refresh();
+                Nowbutton_Action();
             }
+            timer1.Stop();
+            timer1.Enabled = false;
+
         }
 
         private void delbutton_Click(object sender, EventArgs e)
@@ -2274,9 +2286,26 @@ namespace WSPR_Live
         {
             panel1.BringToFront();
             Waitlabel.Visible = true;
-           
+
             Waitlabel.BringToFront();
             Waitlabel.Refresh();
+        }
+
+        private async void calltextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (calltextBox.Text.Trim() == "")
+                {
+                    return;
+                }
+                Waitlabel.Text = "Retrieving live data ... please wait";
+                panel1.Visible = true;
+                timer1.Stop();
+                timer1.Enabled = false;
+                await Nowbutton_Action();
+            }
         }
     }
 }
