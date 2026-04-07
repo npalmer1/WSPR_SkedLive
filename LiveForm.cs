@@ -2,6 +2,11 @@
 using MathNet.Numerics;
 using Microsoft.VisualBasic;
 using MySql.Data.MySqlClient;
+using Mysqlx;
+using Mysqlx.Crud;
+using MySqlX.XDevAPI.Common;
+using MySqlX.XDevAPI.Relational;
+
 using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.Tls;
 using Security;
@@ -92,7 +97,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.17";
+            vers = "0.1.18";
 
             panel1.Left = (this.ClientSize.Width - panel1.Width) / 2;
             panel1.Top = (this.ClientSize.Height - panel1.Height) / 2;
@@ -182,16 +187,26 @@ namespace WSPR_Live
         {
             try
             {
-                string cs = "server=" + db_server + ";user id=" + db_user +
-                            ";password=" + db_pass + ";database=wspr_rx";
-                using (var con = new MySqlConnection(cs))
+                var builder = new MySqlConnectionStringBuilder
                 {
-                    con.Open();
+                    Server = db_server,
+                    UserID = db_user,
+                    Password = db_pass,
+                    Database = "wspr_rx",
+                    SslMode = MySqlSslMode.Disabled,
+                    AllowPublicKeyRetrieval = true
+                };
+                using var connection = new MySqlConnection(builder.ConnectionString);
+
+                //string cs = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx" + "; SslMode = None; AllowPublicKeyRetrieval = True;";
+                using (connection)
+                {
+                    connection.Open();
 
                     // Check table exists
                     using (var cmd = new MySqlCommand(
                         "SELECT COUNT(*) FROM information_schema.tables " +
-                        "WHERE table_schema = 'wspr_rx' AND table_name = 'reported'", con))
+                        "WHERE table_schema = 'wspr_rx' AND table_name = 'reported'", connection))
                     {
                         if (Convert.ToInt32(cmd.ExecuteScalar()) == 0) return;
                     }
@@ -200,7 +215,7 @@ namespace WSPR_Live
                     var existingIndexes = new HashSet<string>();
                     using (var cmd = new MySqlCommand(
                         "SELECT index_name FROM information_schema.statistics " +
-                        "WHERE table_schema = 'wspr_rx' AND table_name = 'reported'", con))
+                        "WHERE table_schema = 'wspr_rx' AND table_name = 'reported'", connection))
                     using (var reader = cmd.ExecuteReader())
                         while (reader.Read())
                             existingIndexes.Add(reader.GetString(0).ToLower());
@@ -221,7 +236,7 @@ namespace WSPR_Live
                         if (!existingIndexes.Contains(name.ToLower()))
                         {
                             using (var cmd = new MySqlCommand(
-                                $"CREATE INDEX {name} {definition}", con))
+                                $"CREATE INDEX {name} {definition}", connection))
                             {
                                 cmd.CommandTimeout = 300; // 5 mins for large tables
                                 cmd.ExecuteNonQuery();
@@ -235,14 +250,29 @@ namespace WSPR_Live
 
         private bool checkDB(string db)
         {
-            string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=" + db;
 
-            MySqlConnection connection = new MySqlConnection(myConnectionString);
-
-
-            try
+            var builder = new MySqlConnectionStringBuilder
             {
-                connection.Open();
+                Server = db_server,
+                UserID = db_user,
+                Password = db_pass,
+                Database = db,
+                SslMode = MySqlSslMode.Disabled,
+                AllowPublicKeyRetrieval = true
+            };
+            using var connection = new MySqlConnection(builder.ConnectionString);
+            
+
+
+            string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=" + db + ";SslMode=None;AllowPublicKeyRetrieval=True;";
+            //File.AppendAllText(@"C:\Users\Public\crash_log.txt", "checkDB attempting: " + myConnectionString + Environment.NewLine);
+
+            //MySqlConnection connection = new MySqlConnection(myConnectionString);
+
+            //File.AppendAllText(@"C:\Users\Public\crash_log.txt", "checkDB connection object created" + Environment.NewLine);
+            try { 
+                connection.Open();          
+                
                 connection.Close();
                 return true;
             }
@@ -871,8 +901,20 @@ namespace WSPR_Live
         private int table_count()
         {
             int count = 0;
-            string connectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
-            var connection = new MySqlConnection(connectionString);
+
+            var builder = new MySqlConnectionStringBuilder
+            {
+                Server = db_server,
+                UserID = db_user,
+                Password = db_pass,
+                Database = "wspr_rx",
+                SslMode = MySqlSslMode.Disabled,
+                AllowPublicKeyRetrieval = true
+            };
+            using var connection = new MySqlConnection(builder.ConnectionString);
+
+            //string connectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx" + "; SslMode = None; AllowPublicKeyRetrieval = True;";
+            //var connection = new MySqlConnection(connectionString);
             try
             {
                 //string connectionString = "Server=server;Port=3306;Database=wspr;User ID=user;Password=pass;";
@@ -904,8 +946,19 @@ namespace WSPR_Live
             int i = 0;
             bool found = false;
 
-            string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
-            MySqlConnection connection = new MySqlConnection(myConnectionString);
+            var builder = new MySqlConnectionStringBuilder
+            {
+                Server = db_server,
+                UserID = db_user,
+                Password = db_pass,
+                Database = "wspr_rx",
+                SslMode = MySqlSslMode.Disabled,
+                AllowPublicKeyRetrieval = true
+            };
+            using var connection = new MySqlConnection(builder.ConnectionString);
+
+           // string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx" + "; SslMode = None; AllowPublicKeyRetrieval = True;";
+            //MySqlConnection connection = new MySqlConnection(myConnectionString);
             if (!databaseError)
             {
 
@@ -1227,230 +1280,6 @@ namespace WSPR_Live
                 cells[i] = "";
             }
         }
-        /*private bool find_selected(string time1, string time2, int band, int tablecount, bool version, string ver) //find a slot row for display in grid from the database corresponding to the date/time from the slot
-        {
-            DataTable Slots = new DataTable();
-            //DateTime d = new DateTime();
-            int i = 0;
-            bool found = false;
-            string myConnectionString = "server=" + db_server + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
-
-            string bandstr = "";
-            string q = "";
-            if (band == -2) //all bands
-            {
-                bandstr = "-1";
-                q = ">=";
-            }
-            else
-            {
-                bandstr = band.ToString();
-                q = "=";
-            }
-            string callstr = "";
-            string fromstr = "";
-            string tostr = "";
-            string C = "";
-            if (!databaseError)
-            {
-
-                // MySqlConnection connection = new MySqlConnection(myConnectionString);
-
-
-
-                MySqlDataReader Reader = null;
-                try
-                {
-                    if (callFiltertextBox.Text.Trim() != "")
-                    {
-                        if (callFiltertextBox.Text.Contains("*"))
-                        {
-                            callFiltertextBox.Text = callFiltertextBox.Text.Replace("*", "");
-                        }
-                        callstr = " AND rx_sign LIKE '" + callFiltertextBox.Text.Trim() + "%' ";
-                    }
-                    fromstr = DFromtextBox.Text.Trim();
-                    tostr = DTotextBox.Text.Trim();
-                    if (fromstr != "")
-                    {
-                        if (!kmcheckBox.Checked)
-                        {
-                            Double k = Convert.ToInt32(fromstr);
-                            k = k * 1.609;
-                            int K = (int)k;
-                            fromstr = K.ToString();
-                        }
-                        fromstr = " AND distance >= " + fromstr + " ";
-                    }
-                    if (tostr != "")
-                    {
-                        if (!kmcheckBox.Checked)
-                        {
-                            Double k = Convert.ToInt32(tostr);
-                            k = k * 1.609;
-                            int K = (int)k;
-                            tostr = K.ToString();
-                        }
-                        tostr = " AND distance <= " + tostr + " ";
-                    }
-                    //command.CommandText = "SELECT * FROM reported ORDER BY time WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band = '" + bandstr + "' DESC LIMIT " + maxrows;
-                    if (version)
-                    {
-                        C = "SELECT * FROM reported WHERE version = '" + ver + "'";
-                    }
-                    else if (datecheckBox.Checked)
-                    {
-                        C = "SELECT * FROM reported WHERE time >= '" + time1 + "' AND time <= '" + time2 + "' AND band " + q + " '" + bandstr + "' " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
-                    }
-                    else
-                    {
-                        C = "SELECT * FROM reported WHERE band " + q + " " + bandstr + " " + callstr + fromstr + tostr + " ORDER BY time DESC LIMIT " + maxrows;
-                    }
-
-                    using (var connection = new MySqlConnection(myConnectionString))
-                    {
-
-                        connection.Open();
-
-                        MySqlCommand command = connection.CreateCommand();
-                        command.CommandTimeout = 60; // seconds
-                        try
-                        {
-                            Reader = command.ExecuteReader();
-                        }
-                        catch
-                        {
-                            Msg.TMessageBox("Error retrieving data - please try again", "Database error", 2000);
-                            return false;
-                        }
-                    }
-                }
-                catch
-                {
-
-                }
-                               
-
-                int pwrW = 100;
-                int dBm = 50;
-                string cwssbpwr = CWSSBlistBox.SelectedItem.ToString();
-                if (CWSSBlistBox.SelectedIndex > -1)
-                {
-                    if (int.TryParse(cwssbpwr, out pwrW))
-                    {
-                        pwrW = pwrW;
-                    }
-                    else
-                    {
-                        pwrW = 100;
-                    }
-
-                }
-                else
-                {
-                    pwrW = 100;
-                }
-                dBm = convertTodBm(pwrW);
-
-                
-                    try
-                    {
-                        while (Reader.Read())
-                        {
-                            found = true;
-
-                            if (i < maxrows && i < tablecount)   //only show first maxrows rows, or to length of reported table
-                            {
-                                clearRX();
-                                clearcells();
-                                try
-                                {
-                                    RX.rx_sign = "";
-                                    RX.time = (DateTime)Reader["time"];
-                                    RX.band = (Int16)Reader["band"];
-                                    RX.rx_sign = (string)Reader["rx_sign"];
-                                    RX.rx_loc = (string)Reader["rx_loc"];
-                                    RX.tx_sign = (string)Reader["tx_sign"];
-                                    RX.tx_loc = (string)Reader["tx_loc"];
-                                    RX.distance = (int)Reader["distance"];
-                                    RX.azimuth = (int)Reader["azimuth"];
-                                    RX.frequency = (int)Reader["frequency"];
-                                    RX.power = (Int16)Reader["power"];
-                                    RX.snr = (Int16)Reader["snr"];
-                                    RX.drift = (Int16)Reader["drift"];
-                                    RX.version = (string)Reader["version"];
-                                }
-                                catch
-                                {
-                                }
-
-                                if (RX.rx_sign != "" && RX.rx_sign != null)
-                                {
-                                    try
-                                    {
-                                        cells[0] = RX.time.ToString("yyyy-MM-dd HH:mm"); //time
-                                        cells[1] = RX.tx_sign; //tx sign
-                                        double f = Convert.ToDouble(RX.frequency);
-                                        f = f / 1000000;
-                                        string formattedF = f.ToString("F6");
-                                        cells[2] = formattedF; //freq
-                                        string snr = Convert.ToString(RX.snr);
-                                        if (RX.snr > 0)
-                                        {
-                                            snr = "+" + snr;
-                                        }
-                                        cells[3] = snr;  //snr
-                                        cells[4] = RX.drift.ToString();  //drift
-                                        cells[5] = RX.tx_loc;  //tx loc
-                                        cells[6] = RX.power.ToString();   //power dBm
-                                        cells[7] = RX.rx_sign;  //reporter
-                                        cells[8] = RX.rx_loc;    //rx loc
-
-                                        cells[9] = RX.distance.ToString();   //km
-                                        int km = Convert.ToInt32(RX.distance);    //miles
-                                        cells[10] = convert_to_miles(km);
-                                        cells[11] = RX.azimuth.ToString();
-                                        cells[14] = RX.version;   //version
-                                        cells[12] = getCW(RX.snr, RX.power, dBm);
-                                        cells[13] = getSSB(RX.snr, RX.power, dBm);
-                                        update_grid(); //add this row to the datagridview
-                                    }
-                                    catch
-                                    {
-                                    }
-                                }
-                                i++;
-                            }
-                            else
-                            {
-                                break;
-                            }
-
-                        }
-                        Reader.Close();
-                        //connection.Close();
-                        databaseError = false;
-
-
-                    }
-                    catch
-                    {
-
-                        //databaseError = true; //stop wasting time trying to connect if database error - ignore for present
-                        found = false;
-                        //connection.Close();
-
-                    }
-                    finally
-                    {
-                        Monitor.Exit(_lock); // always releases the lock }
-
-                    }
-                
-            }
-            return found;
-        }*/
-
         private bool find_selected(string time1, string time2, int band, int tablecount, bool version, string ver)
         {
             if (databaseError) return false;
@@ -1573,12 +1402,23 @@ namespace WSPR_Live
             // ── Query database ────────────────────────────────────────────────────
             bool found = false;
             int i = 0;
-            string myConnectionString = "server=" + db_server + ";user id=" + db_user +
-                                        ";password=" + db_pass + ";database=wspr_rx" +
-                                        ";Pooling=true";
+            //string myConnectionString = "server=" + db_server + ";user id=" + db_user +";password=" + db_pass + ";database=wspr_rx" +";Pooling=true" + "; SslMode = None; AllowPublicKeyRetrieval = True;";
+
+            var builder = new MySqlConnectionStringBuilder
+            {
+                Server = db_server,
+                UserID = db_user,
+                Password = db_pass,
+                Database = "wspr_rx",
+                SslMode = MySqlSslMode.Disabled,
+                Pooling = true,
+                AllowPublicKeyRetrieval = true
+            };
+            
+
             try
             {
-                using (var connection = new MySqlConnection(myConnectionString))
+                using (var connection = new MySqlConnection(builder.ConnectionString))
                 {
                     connection.Open();
                     using (var command = connection.CreateCommand())
@@ -1707,9 +1547,20 @@ namespace WSPR_Live
 
             DateTime date = new DateTime();
 
-            string myConnectionString = "server=" + serverName + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx";
-            MySqlConnection connection = new MySqlConnection();
-            connection.ConnectionString = myConnectionString;
+            var builder = new MySqlConnectionStringBuilder
+            {
+                Server = db_server,
+                UserID = db_user,
+                Password = db_pass,
+                Database = "wspr_rx",
+                SslMode = MySqlSslMode.Disabled,
+                AllowPublicKeyRetrieval = true
+            };
+            using var connection = new MySqlConnection(builder.ConnectionString);
+
+            //string myConnectionString = "server=" + serverName + ";user id=" + db_user + ";password=" + db_pass + ";database=wspr_rx" + "; SslMode = None; AllowPublicKeyRetrieval = True;";
+            //MySqlConnection connection = new MySqlConnection();
+           // connection.ConnectionString = myConnectionString;
             MySqlCommand command = connection.CreateCommand();
 
             lock (_lock)
