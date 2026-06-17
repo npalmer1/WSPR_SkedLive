@@ -97,7 +97,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.18";
+            vers = "0.1.19";
 
             panel1.Left = (this.ClientSize.Width - panel1.Width) / 2;
             panel1.Top = (this.ClientSize.Height - panel1.Height) / 2;
@@ -1946,6 +1946,11 @@ namespace WSPR_Live
         {
             try
             {
+                if (updatecheckBox.Checked)
+                {
+                    Msg.TMessageBox("Updates disabled", "Updates", 3000);
+                    return;
+                }
                 string freq = "";
                 startCount++;
                 startCountMax = 4;      //timer tick every minute - so act after 4 mins
