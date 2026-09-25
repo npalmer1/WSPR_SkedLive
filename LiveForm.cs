@@ -97,7 +97,7 @@ namespace WSPR_Live
         private async void LiveForm_Load(object sender, EventArgs e)
         {
             System.Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            vers = "0.1.19";
+            vers = "0.1.20";
 
             panel1.Left = (this.ClientSize.Width - panel1.Width) / 2;
             panel1.Top = (this.ClientSize.Height - panel1.Height) / 2;
@@ -681,8 +681,9 @@ namespace WSPR_Live
         public async Task<bool> checkSQL()
         {
             try
-            {
+            {              
                 using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(10);  //10 sec timeout instead of 100s default
                 var response = await client.GetStringAsync("http://db1.wspr.live/?query=SELECT%20version()");
                 if (response != "" || response != null)
                 {
@@ -733,7 +734,9 @@ namespace WSPR_Live
                     int band = 0;
 
                     //note livelimit  is 1000 - max number of entries to extract from wspr.live database
+                  
                     using var client = new HttpClient();
+                    client.Timeout = TimeSpan.FromSeconds(10);   // 10 sec timeout
 
                     string baseUrl = "http://db1.wspr.live/";
                     string sqlQuery = $"SELECT * FROM wspr.rx WHERE tx_sign LIKE '%{call}%' AND time >= subtractMinutes(now(), {timespan}) AND time <= subtractMinutes(now(), 2) LIMIT {liveLimit}";
@@ -808,35 +811,15 @@ namespace WSPR_Live
 
                     isUnlocked = true;
 
-
-                    //await Task.Delay(1000);
-
-                    /*if (owncall)
-                    {
-                        await show_results(cwssbpwr);
-                    }
-                    else
-                    {
-                        dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Descending);  //order by date
-                    }*/
-
                 }
                 catch
                 {
-                    if (tries > 3)
-                    {
-                        isUnlocked = true;
-                    }
-                    Thread.Sleep(800);
                     tries++;
-
+                    if (tries > 3) 
+                    { isUnlocked = true; }
+                    else { await Task.Delay(800); }   
                 }
-                if (tries > 3)
-                {
-                    isUnlocked = true;
-                }
-                Thread.Sleep(800);
-                tries++;
+               
             }
 
 
@@ -1942,7 +1925,43 @@ namespace WSPR_Live
 
             }
         }
+        private volatile bool _updateInProgress = false;
+
         private async void updatePassandCall()
+        {
+            if (_updateInProgress) return;   // previous call still running - skip this tick cleanly
+            _updateInProgress = true;
+            try
+            {
+                if (updatecheckBox.Checked)
+                {
+                    Msg.TMessageBox("Updates disabled", "Updates", 3000);
+                    return;
+                }
+                string freq = "";
+                startCount++;
+                startCountMax = 4;
+                int min = 20;
+                int index = PlistBox.TopIndex;
+                string text = PlistBox.Items[index].ToString();
+
+                min = findPeriod();
+
+                if (startCount > startCountMax)
+                {
+                    startCount = 0;
+                    await get_results(Callsign, freq, db_server, db_user, db_pass, min, owncall);
+                    await Task.Delay(2000);
+                    show_results();
+                }
+            }
+            catch { }
+            finally
+            {
+                _updateInProgress = false;
+            }
+        }
+        /*private async void updatePassandCall()
         {
             try
             {
@@ -1976,7 +1995,8 @@ namespace WSPR_Live
             }
             catch { }
 
-        }
+        }*/
+
 
         private void testDBbutton_Click(object sender, EventArgs e)
         {
