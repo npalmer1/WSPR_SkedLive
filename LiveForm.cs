@@ -1789,6 +1789,7 @@ namespace WSPR_Live
                 if (!await checkSQL())
                 {
                     Msg.TMessageBox("Cannot connect to wspr.live ...", "Error connecting", 3500);
+                    panel1.Visible =false;
                     return;
                 }
                 string freq = "";
